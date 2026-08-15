@@ -1,0 +1,14 @@
+*.xlsm
+*.xlsx
+*.xlsb
+*.frx
+*.exe
+*.msi
+BackupDB/
+INSTALADORES/
+NFC/
+XML/
+*.bak
+*.zip
+.DS_Store
+Thumbs.db
