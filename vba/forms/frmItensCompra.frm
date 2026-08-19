@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmItensCompra
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   14445
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmItensCompra.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmItensCompra"
@@ -22,10 +22,15 @@ FormatarMoeda txtCusto
 
 End Sub
 
-'=============================================================
-'inicializa√ß√£o (inica o form pelo botao)
-'===============================================================
-Private Sub UserForm_initialize()
+Private Sub txtVencimento_Change()
+
+    FormatarData txtVencimento
+
+End Sub
+
+Private Sub UserForm_Initialize()
+
+On Error GoTo TratarErro
 
     With lvProdutos
 
@@ -50,9 +55,24 @@ Private Sub UserForm_initialize()
     CarregarProdutosCombo cmbProduto
     CalcularSubtotal
     
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmItensCompra - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+    
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
+
+On Error GoTo TratarErro
 
     If TipoEntrada = "XML" Then
         
@@ -78,12 +98,27 @@ Private Sub Userform_activate()
     CarregarProdutosCombo cmbProduto
     CarregarUnidadesMedida cmbUM
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmItensCompra - activate"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 '====================================================
 ' sub total da compra
 '====================================================
 Private Sub CalcularSubtotal()
+
+On Error GoTo TratarErro
 
     Dim i As Long
     Dim ValorTotal As Double
@@ -130,13 +165,29 @@ Private Sub CalcularSubtotal()
     rs.Close
     Set rs = Nothing
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmItenscompra - calcularsubtotal"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
+
 Private Sub CarregarItensXML(ByVal NumeroNF As String)
+
+On Error GoTo TratarErro
 
     Dim ws As Worksheet
     Dim tb As ListObject
     Dim i As Long
-    Dim item As ListItem
+    Dim ITEM As ListItem
     Dim PRODUTO As Variant
     
     Dim CodigoBarras As String
@@ -166,24 +217,24 @@ Private Sub CarregarItensXML(ByVal NumeroNF As String)
 
             If PRODUTO(0) <> "" Then
                 
-                Set item = lvProdutos.ListItems.Add(, , PRODUTO(0))
-                item.SubItems(1) = PRODUTO(1)
-                item.SubItems(7) = "CADASTRADO"
+                Set ITEM = lvProdutos.ListItems.Add(, , PRODUTO(0))
+                ITEM.SubItems(1) = PRODUTO(1)
+                ITEM.SubItems(7) = "CADASTRADO"
                 
             Else
                 
-                Set item = lvProdutos.ListItems.Add(, , "")
-                item.SubItems(1) = Nz(tb.DataBodyRange(i, tb.ListColumns("NOME").Index).Value)
-                item.SubItems(7) = "SEM CADASTRO"
+                Set ITEM = lvProdutos.ListItems.Add(, , "")
+                ITEM.SubItems(1) = Nz(tb.DataBodyRange(i, tb.ListColumns("NOME").Index).Value)
+                ITEM.SubItems(7) = "SEM CADASTRO"
                 
             End If
 
 
-            item.SubItems(2) = Nz(tb.DataBodyRange(i, tb.ListColumns("MEDIDA COMPRA").Index).Value)
-            item.SubItems(3) = NzDbl(tb.DataBodyRange(i, tb.ListColumns("QUANTIDADE").Index).Value)
-            item.SubItems(4) = Format(NzDbl(tb.DataBodyRange(i, tb.ListColumns("VALOR UNITARIO").Index).Value), "0.00")
-            item.SubItems(5) = Format(NzDbl(tb.DataBodyRange(i, tb.ListColumns("VALOR TOTAL").Index).Value), "0.00")
-            item.SubItems(6) = "0.00"
+            ITEM.SubItems(2) = Nz(tb.DataBodyRange(i, tb.ListColumns("MEDIDA COMPRA").Index).Value)
+            ITEM.SubItems(3) = NzDbl(tb.DataBodyRange(i, tb.ListColumns("QUANTIDADE").Index).Value)
+            ITEM.SubItems(4) = Format(NzDbl(tb.DataBodyRange(i, tb.ListColumns("VALOR UNITARIO").Index).Value), "0.00")
+            ITEM.SubItems(5) = Format(NzDbl(tb.DataBodyRange(i, tb.ListColumns("VALOR TOTAL").Index).Value), "0.00")
+            ITEM.SubItems(6) = "0.00"
 
 
         End If
@@ -193,6 +244,19 @@ Private Sub CarregarItensXML(ByVal NumeroNF As String)
 
     CalcularSubtotal
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmItensCompra - Carregar Itens xml"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 
 End Sub
 
@@ -201,9 +265,11 @@ End Sub
 '====================================================
 Private Sub CarregarItensCompra()
 
+On Error GoTo TratarErro
+
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     If Trim(txtIdCompra.Value) = "" Then Exit Sub
 
@@ -225,13 +291,13 @@ sql = "SELECT IC.IDPRODUTO, " & _
 
     Do While Not rs.EOF
 
-        Set item = lvProdutos.ListItems.Add(, , CStr(rs!IDProduto))
+        Set ITEM = lvProdutos.ListItems.Add(, , CStr(rs!idproduto))
 
-        item.SubItems(1) = IIf(IsNull(rs!NOME), "", rs!NOME)
-        item.SubItems(2) = IIf(IsNull(rs!MEDIDACOMPRA), 0, rs!MEDIDACOMPRA)
-        item.SubItems(3) = IIf(IsNull(rs!QUANTIDADE), 0, rs!QUANTIDADE)
-        item.SubItems(4) = Format(IIf(IsNull(rs!CUSTOUNITARIO), 0, rs!CUSTOUNITARIO), "0.00")
-        item.SubItems(5) = Format(IIf(IsNull(rs!subtotal), 0, rs!subtotal), "0.00")
+        ITEM.SubItems(1) = IIf(IsNull(rs!NOME), "", rs!NOME)
+        ITEM.SubItems(2) = IIf(IsNull(rs!MEDIDACOMPRA), 0, rs!MEDIDACOMPRA)
+        ITEM.SubItems(3) = IIf(IsNull(rs!QUANTIDADE), 0, rs!QUANTIDADE)
+        ITEM.SubItems(4) = Format(IIf(IsNull(rs!CUSTOUNITARIO), 0, rs!CUSTOUNITARIO), "0.00")
+        ITEM.SubItems(5) = Format(IIf(IsNull(rs!subtotal), 0, rs!subtotal), "0.00")
 
         rs.MoveNext
 
@@ -244,6 +310,19 @@ sql = "SELECT IC.IDPRODUTO, " & _
 
     CalcularSubtotal
     
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmItensCompra - Carregar lv "
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+    
 End Sub
 
 Private Sub txtEAN5_AfterUpdate()
@@ -254,30 +333,32 @@ Private Sub txtEAN5_AfterUpdate()
 End Sub
 Private Sub cmbProduto_afterupdate()
 
+On Error GoTo TratarErro
+
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim IDProduto As Long
+    Dim idproduto As Long
 
     If cmbProduto.ListIndex = -1 Then Exit Sub
 
-    IDProduto = CLng(cmbProduto.Value)
+    idproduto = CLng(cmbProduto.Value)
 
     sql = "SELECT CUSTOUNITARIO, codigofornecedor, codigobarrascx, medidacompra, quantidadecompra, codigobarras, quantidadeembalagem, tipo " & _
           "FROM TAB_PRODUTOS " & _
-          "WHERE IDPRODUTO = " & IDProduto
+          "WHERE IDPRODUTO = " & idproduto
 
     Set rs = Conn.Execute(sql)
 
     If Not rs.EOF Then
 
         '====================================================
-        ' VALIDA SE √â COMBO
+        ' VALIDA SE … COMBO
         '====================================================
         If UCase(Nz(rs!tipo, "")) = "COMBO" Then
 
-            MsgBox "Este produto √© um COMBO." & vbCrLf & _
+            MsgBox "Este produto È um COMBO." & vbCrLf & _
                    "Selecione um produto individual para continuar.", _
-                   vbExclamation, "Produto inv√°lido"
+                   vbExclamation, "Produto inv·lido"
 
             cmbProduto.Value = Null
             cmbProduto.SetFocus
@@ -302,12 +383,24 @@ Private Sub cmbProduto_afterupdate()
     
         txtQuantidade.SetFocus
     
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmItensCompra - cmbProduto change"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+    
 End Sub
 
-'====================================================
-' RODA PROCEDURE ENTRADA PRODUTOS
-'===================================================
 Private Sub btnAdcItem_Click()
+
+On Error GoTo TratarErro
 
     Dim sql As String
     Dim rs As ADODB.Recordset
@@ -341,12 +434,12 @@ Private Sub btnAdcItem_Click()
     End If
 
   If Not IsNumeric(txtQuantidade.Value) Then
-    MsgBox "Quantidade inv√°lida."
+    MsgBox "Quantidade inv·lida."
     Exit Sub
 End If
 
 If CDbl(txtQuantidade.Value) <= 0 Then
-    MsgBox "Quantidade inv√°lida."
+    MsgBox "Quantidade inv·lida."
     Exit Sub
 End If
 
@@ -394,6 +487,19 @@ End If
 
     cmbProduto.SetFocus
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmItensCompra - btnAdcItem"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 '==================================
@@ -408,6 +514,8 @@ End Sub
 'retira item da entrada e qtde do estoque
 '================================
 Private Sub btnExcluirItem_Click()
+
+On Error GoTo TratarErro
 
     Dim sql As String
     Dim rs As ADODB.Recordset
@@ -435,7 +543,7 @@ Private Sub btnExcluirItem_Click()
     Set rs = Nothing
 
     If UCase(Trim(StatusCompra)) <> "ABERTO" Then
-        MsgBox "ENTRADA CANCELADA OU CONCLU√çDA.", vbExclamation
+        MsgBox "ENTRADA CANCELADA OU CONCLUÕDA.", vbExclamation
         Exit Sub
     End If
 
@@ -469,11 +577,26 @@ Private Sub btnExcluirItem_Click()
 
     CarregarItensCompra
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmItensCompra - btnExcluir item"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 '==================================
 'cancelar todo processo de entrada
 '==================================
 Private Sub btnCancelar_Click()
+
+On Error GoTo TratarErro
 
     Dim cmd As ADODB.Command
     Dim rs As ADODB.Recordset
@@ -526,8 +649,23 @@ Private Sub btnCancelar_Click()
 
     Unload Me
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmItensCompra - btnCancelar entrada"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 Private Sub btnFecharEntrada_Click()
+
+On Error GoTo TratarErro
 
     Dim sql As String
     Dim rs As ADODB.Recordset
@@ -685,6 +823,19 @@ DataSQL = Format$(NzDate(txtVencimento.Value), "yyyy-mm-dd")
     Set cmd = Nothing
 
     Unload Me
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmItensCOmpra - btnFechar (finalizar)"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 

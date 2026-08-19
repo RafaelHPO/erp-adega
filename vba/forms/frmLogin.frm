@@ -1,11 +1,11 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmLogin 
-   Caption         =   "Login - ERP Comercial"
+   Caption         =   "Login - ERP Adega"
    ClientHeight    =   7245
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   6825
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmLogin.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmLogin"
@@ -14,9 +14,9 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
 
-    lblSistema.Caption = "SISTEMA DEMO"
+    lblSistema.Caption = "ADEGA BLACK BOX"
 
     If Conn.State = 1 Then
 
@@ -24,7 +24,7 @@ Private Sub UserForm_initialize()
 
     Else
 
-        lblBanco.Caption = "Sem conex√£o"
+        lblBanco.Caption = "Sem conex„o"
 
     End If
 

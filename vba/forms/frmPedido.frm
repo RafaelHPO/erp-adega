@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmPedido
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   15810
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmPedido.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmPedido"
@@ -13,15 +13,10 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
-
-'verifica status venda
-'=====================
-
 Private abrirPagamento As Boolean
 Private idVendaPagamento As Long
-
 Private bloqueioUI As Boolean
+Public editandoitem As Boolean
 
 Private Function VendaAberta() As Boolean
 
@@ -51,28 +46,104 @@ Private Function VendaAberta() As Boolean
     Set rs = Nothing
 
 End Function
+
+Private Sub btnEditarItem_Click()
+
+    On Error GoTo TratarErro
+
+    Dim sql As String
+    Dim rs As ADODB.Recordset
+    Dim idproduto As Long
+    Dim idvenda As Long
+    
+    editandoitem = True
+    
+    idproduto = lvProdutos.SelectedItem.Text
+    idvenda = txtIdVenda.Value
+  
+        cmbProduto = idproduto
+        
+            Call cmbProduto_afterupdate
+    
+    sql = " select sum(iv.quantidade) as qtde from tab_itensvenda iv " & _
+          " where iv.idproduto = " & idproduto & _
+          " and iv.idvenda = " & idvenda
+          
+    Set rs = Conn.Execute(sql)
+    
+        If Not rs.EOF Then
+    
+            txtQuantidade.Value = Nz(rs!qtde)
+            
+        rs.Close
+        Set rs = Nothing
+        
+    End If
+
+    sql = " call PROC_EDITARITEMVENDA(" & IDUsuarioLogado & ", " & idproduto & ", " & idvenda & ") "
+    
+    Conn.Execute sql
+    
+    CarregarItensVenda
+    
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - btnEditarItem"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+    
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+    
+End Sub
+
+Private Sub lvprodutos_dblclick()
+
+  Call btnEditarItem_Click
+    
+End Sub
+
 Private Sub btnPagamento_Click()
+
+On Error GoTo TratarErro
 
     If Not VendaAberta Then
         MsgBox "VENDA CANCELADA OU CONCLUIDA", vbExclamation
         Exit Sub
     End If
 
-    Dim id As Long
-    id = CLng(txtIdVenda.Value)
+    Dim ID As Long
+    ID = CLng(txtIdVenda.Value)
 
     Set frmPagamento = New frmPagamento
 
-    frmPagamento.idvenda = id
+    frmPagamento.idvenda = ID
     frmPagamento.Show vbModal
 
-    'quando voltar do pagamento
     CarregarItensVenda
-    'CarregarTotais
+    
+    Exit Sub
 
+TratarErro:
+
+    modSistema.tela = "frmPedido - btnPagamento"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+                        
 End Sub
 
 Private Sub btnPendente_Click()
+
+On Error GoTo TratarErro
 
     If Not VendaAberta Then
         MsgBox "VENDA CANCELADA OU CONCLUIDA", vbExclamation
@@ -91,6 +162,19 @@ If Trim(REF) <> "" Then
 End If
 
   Unload Me
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - btnPendente"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 
@@ -111,10 +195,11 @@ Private Sub txtsubtotal_activate()
  btnAdcItem.SetFocus
 
 End Sub
-_
 
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
+
+On Error GoTo TratarErro
 
     With lvProdutos
 
@@ -122,13 +207,14 @@ Private Sub UserForm_initialize()
         .FullRowSelect = True
         .Gridlines = True
         .HideSelection = False
+        .AllowColumnReorder = True
 
         .ColumnHeaders.Clear
 
         .ColumnHeaders.Add , , "ID", 60
         .ColumnHeaders.Add , , "PRODUTO", 220
         .ColumnHeaders.Add , , "QTDE", 60
-        .ColumnHeaders.Add , , "PREÃ‡O", 80
+        .ColumnHeaders.Add , , "PREÇO", 80
         .ColumnHeaders.Add , , "SUBTOTAL", 90
 
     End With
@@ -137,8 +223,23 @@ Private Sub UserForm_initialize()
     CarregarReferenciaVenda
     txtEAN5.SetFocus
     
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+    
 End Sub
-Private Sub Userform_activate()
+Private Sub userform_activate()
+
+    On Error GoTo TratarErro
 
     If Trim(txtIdVenda.Value) <> "" Then
 
@@ -156,6 +257,20 @@ CarregarReferenciaVenda
 
     End If
  txtEAN5.SetFocus
+ 
+     Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - activate"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+ 
 End Sub
 
 Private Sub CarregarReferenciaVenda()
@@ -201,9 +316,11 @@ Private Sub CalcularSubtotal()
 End Sub
 Private Sub CarregarItensVenda()
 
+On Error GoTo TratarErro
+
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     If Trim(txtIdVenda.Value) = "" Then Exit Sub
 
@@ -238,12 +355,12 @@ End If
 
     Do While Not rs.EOF
 
-        Set item = lvProdutos.ListItems.Add(, , CStr(rs!IDProduto))
+        Set ITEM = lvProdutos.ListItems.Add(, , CStr(rs!idproduto))
 
-        item.SubItems(1) = IIf(IsNull(rs!NOME), "", rs!NOME)
-        item.SubItems(2) = IIf(IsNull(rs!QUANTIDADE), 0, rs!QUANTIDADE)
-        item.SubItems(3) = Format(IIf(IsNull(rs!PRECOUNITARIO), 0, rs!PRECOUNITARIO), "0.00")
-        item.SubItems(4) = Format(IIf(IsNull(rs!subtotal), 0, rs!subtotal), "0.00")
+        ITEM.SubItems(1) = IIf(IsNull(rs!NOME), "", rs!NOME)
+        ITEM.SubItems(2) = IIf(IsNull(rs!QUANTIDADE), 0, rs!QUANTIDADE)
+        ITEM.SubItems(3) = Format(IIf(IsNull(rs!PRECOUNITARIO), 0, rs!PRECOUNITARIO), "0.00")
+        ITEM.SubItems(4) = Format(IIf(IsNull(rs!subtotal), 0, rs!subtotal), "0.00")
 
         rs.MoveNext
 
@@ -256,6 +373,19 @@ End If
 
     CalcularSubtotal
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - Carrega itens venda"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub txtEAN5_AfterUpdate()
@@ -267,36 +397,56 @@ End Sub
 
 Private Sub cmbProduto_afterupdate()
 
+On Error GoTo TratarErro
+
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim IDProduto As Long
+    Dim idproduto As Long
 
     If cmbProduto.ListIndex = -1 Then Exit Sub
 
-    IDProduto = CLng(cmbProduto.List(cmbProduto.ListIndex, 0))
+    idproduto = CLng(cmbProduto.List(cmbProduto.ListIndex, 0))
 
-    sql = "SELECT PRECOVENDA, ESTOQUEATUAL, TIPO " & _
+    sql = "SELECT PRECOVENDA, ESTOQUEATUAL, TIPO, CODIGOBARRAS " & _
           "FROM TAB_PRODUTOS " & _
-          "WHERE IDPRODUTO = " & IDProduto
+          "WHERE IDPRODUTO = " & idproduto
 
     Set rs = Conn.Execute(sql)
 
     If Not rs.EOF Then
 
         txtPreco.Value = Format(IIf(IsNull(rs!PRECOVENDA), 0, rs!PRECOVENDA), "0.00")
-        txtTipo.Value = (rs!tipo)
+        txtTipo.Value = Nz(rs!tipo)
         txtEstoque.Value = IIf(IsNull(rs!ESTOQUEATUAL), 0, rs!ESTOQUEATUAL)
-
+        txtEAN5.Value = Nz(rs!CodigoBarras)
+        
     End If
 
     rs.Close
     Set rs = Nothing
     
-txtQuantidade.SetFocus
+'txtQuantidade.SetFocus
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - cmbProduto change"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 
 Private Sub btnAdcItem_Click()
+
+    editandoitem = False
+
+On Error GoTo TratarErro
 
     Dim sql As String
     Dim preco As String
@@ -322,7 +472,7 @@ End If
     End If
 
     If Val(txtQuantidade.Value) <= 0 Then
-        MsgBox "Quantidade invÃ¡lida.", vbExclamation
+        MsgBox "Quantidade inválida.", vbExclamation
         Exit Sub
     End If
 
@@ -361,8 +511,23 @@ End If
 
     cmbProduto.SetFocus
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - btnAdcItem"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 Private Sub btnExcluirItem_Click()
+
+On Error GoTo TratarErro
 
     Dim cmd As ADODB.Command
 
@@ -402,9 +567,24 @@ End If
     DoEvents
 
     CarregarItensVenda
+    
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - btnExcluirItem"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 Private Sub btnCancelarVenda_Click()
+
+On Error GoTo TratarErro
 
 If Not SolicitarSenhaCaixa() Then Exit Sub
 
@@ -442,10 +622,24 @@ End If
 
     Me.Hide
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - btnCancelarVenda"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
-
 Private Sub btnFecharVenda_Click()
+
+On Error GoTo TratarErro
 
     Dim sql As String
     Dim rs As ADODB.Recordset
@@ -477,7 +671,7 @@ Private Sub btnFecharVenda_Click()
     Set rs = Conn.Execute(sql)
 
     If rs.EOF Then
-        MsgBox "Venda nÃ£o possui produtos, adicionar", vbExclamation
+        MsgBox "Venda não possui produtos, adicionar", vbExclamation
         rs.Close
         Set rs = Nothing
         Exit Sub
@@ -554,6 +748,19 @@ Private Sub btnFecharVenda_Click()
     LimparTelaVenda
     Me.Hide
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - FecharVenda"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub LimparTelaVenda()
@@ -570,3 +777,23 @@ cmbProduto.ListIndex = -1
 lvProdutos.ListItems.Clear
 
 End Sub
+
+Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
+
+    If editandoitem = True Then
+        
+        MsgBox "Não é possível fechar " & vbCrLf & _
+               "Enquanto edita um item!", vbInformation, "AVISO"
+        
+        Cancel = True
+        Exit Sub
+        
+    End If
+
+    If CloseMode = vbFormControlMenu Then
+        Cancel = False
+        Exit Sub
+    End If
+
+End Sub
+

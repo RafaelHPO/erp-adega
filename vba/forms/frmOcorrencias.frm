@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmOcorrencias 
    Caption         =   "OCORRENCIAS / SUGESTOES"
-   ClientHeight    =   8415.001
+   ClientHeight    =   8505.001
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   13620
@@ -72,13 +72,13 @@ Private Sub CarregarOcorrencias()
     On Error GoTo TrataErro
 
     Dim rs As ADODB.Recordset
-    Dim SQL As String
-    Dim Etapa As String
+    Dim sql As String
+    Dim etapa As String
     Dim ITEM As ListItem
 
-Etapa = "Montando SQL"
+etapa = "Montando SQL"
 
-    SQL = "SELECT " & _
+    sql = "SELECT " & _
           "O.IDREPORT, " & _
           "O.DATA, " & _
           "O.OCORRENCIA, " & _
@@ -95,7 +95,7 @@ Etapa = "Montando SQL"
 
         If cmbDataInicial.ListIndex > 0 Then
 
-            SQL = SQL & _
+            sql = sql & _
                 " AND O.DATA >= '" & _
                 Format$(NzDate(cmbDataInicial.Value), "yyyy-mm-dd") & "'"
 
@@ -108,7 +108,7 @@ Etapa = "Montando SQL"
 
         If cmbDataFinal.ListIndex > 0 Then
 
-            SQL = SQL & _
+            sql = sql & _
                 " AND O.DATA <= '" & _
                 Format$(NzDate(cmbDataFinal.Value), "yyyy-mm-dd") & "'"
 
@@ -119,24 +119,24 @@ Etapa = "Montando SQL"
     If cmbStatus.Value <> "" And _
        cmbStatus.Value <> "TODOS" Then
 
-        SQL = SQL & _
+        sql = sql & _
             " AND O.STATUS = " & _
             SqlTexto(cmbStatus.Value)
 
     End If
 
-    SQL = SQL & _
+    sql = sql & _
           " ORDER BY O.IDREPORT DESC"
           
-Etapa = "Executando SQL"
-Set rs = Conn.Execute(SQL)
+etapa = "Executando SQL"
+Set rs = Conn.Execute(sql)
 
-Etapa = "Limpando ListView"
+etapa = "Limpando ListView"
 lvOcorrencias.ListItems.Clear
 
         lvOcorrencias.ListItems.Clear
 
-Etapa = "Carregando ListView"
+etapa = "Carregando ListView"
 
         Do While Not rs.EOF
         
@@ -174,14 +174,14 @@ Etapa = "Carregando ListView"
 
 TrataErro:
 
-    MsgBox "Etapa: " & Etapa & vbCrLf & _
+    MsgBox "Etapa: " & etapa & vbCrLf & _
            "Erro: " & Err.Number & vbCrLf & _
            "Descrição: " & Err.Description, _
            vbCritical, "frmOcorrencias"
 
 End Sub
 
-Private Sub cmbDataInicial_Change()
+Private Sub cmbDataInicial_change()
 
 'On Error GoTo TrataErro
 
@@ -198,7 +198,7 @@ TrataErro:
 End Sub
 
 
-Private Sub cmbDataFinal_Change()
+Private Sub cmbDataFinal_change()
 
 'On Error GoTo TrataErro
 
@@ -215,7 +215,7 @@ TrataErro:
 End Sub
 
 
-Private Sub cmbStatus_Change()
+Private Sub cmbStatus_change()
 
 'On Error GoTo TrataErro
 
@@ -250,17 +250,17 @@ Private Sub CarregarDatas()
     On Error GoTo TrataErro
 
     Dim rs As ADODB.Recordset
-    Dim SQL As String
+    Dim sql As String
     Dim DataInicial As Date
     Dim DataFinal As Date
     Dim DataAtual As Date
 
-    SQL = "SELECT MIN(DATA) AS DATAINICIAL, " & _
+    sql = "SELECT MIN(DATA) AS DATAINICIAL, " & _
           "MAX(DATA) AS DATAFINAL " & _
           "FROM TAB_OCORRENCIAS " & _
           "WHERE DATA IS NOT NULL"
 
-    Set rs = Conn.Execute(SQL)
+    Set rs = Conn.Execute(sql)
 
     cmbDataInicial.Clear
     cmbDataFinal.Clear

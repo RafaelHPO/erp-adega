@@ -1,18 +1,19 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCadCombo 
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCadComboteste 
    Caption         =   "CADASTRO DE COMBO"
    ClientHeight    =   7590
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   11145
-   OleObjectBlob   =   "frmCadCombo.frx":0000
+   OleObjectBlob   =   "frmCadComboteste.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
-Attribute VB_Name = "frmCadCombo"
+Attribute VB_Name = "frmCadComboteste"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
 
     If KeyCode = vbKeyEscape Then

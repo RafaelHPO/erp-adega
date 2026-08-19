@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmContas
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   7020
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmContas.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmContas"
@@ -38,7 +38,7 @@ Private Sub txtDataVen_Change()
 End Sub
 
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
 
     CarregarComboFornecedor cmbFornecedor
 
@@ -57,14 +57,6 @@ Public Sub PrepararNovaConta()
     btnSalvar.Visible = True
     btnBaixarConta.Visible = False
     btnExcluir.Visible = False
-
-End Sub
-
-Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-
-    If KeyCode = vbKeyEscape Then
-        Unload Me
-    End If
 
 End Sub
 
@@ -89,14 +81,14 @@ On Error GoTo TratarErro
               "WHERE IDARECEBER = " & IdConta
 
     Else
-        MsgBox "Tipo de conta inv√°lido.", vbExclamation
+        MsgBox "Tipo de conta inv·lido.", vbExclamation
         Exit Sub
     End If
 
     Set rs = Conn.Execute(sql)
 
     If rs.EOF Then
-        MsgBox "Conta n√£o encontrada.", vbExclamation
+        MsgBox "Conta n„o encontrada.", vbExclamation
         rs.Close
         Set rs = Nothing
         Exit Sub
@@ -137,16 +129,24 @@ Next i
     rs.Close
     Set rs = Nothing
 
-Exit Sub
-
+    Exit Sub
 
 TratarErro:
 
-MsgBox " erro: " & Err.Description, vbCritical
+    modSistema.tela = "Contas - CarregarConta"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 
 Private Sub btnBaixarConta_Click()
+
+On Error GoTo TratarErro
 
 If Not SolicitarSenhaCaixa() Then Exit Sub
 
@@ -176,9 +176,24 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
     MsgBox "Baixado!", vbInformation
     Unload Me
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "Contas - Baixar Conta"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub btnExcluir_Click()
+
+On Error GoTo TratarErro
 
 If Not SolicitarSenhaCaixa() Then Exit Sub
 
@@ -207,9 +222,24 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
     RecarregarFluxoCaixa
     Unload Me
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "Contas - Excluir"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub btnSalvar_Click()
+
+On Error GoTo TratarErro
 
 If Not SolicitarSenhaCaixa() Then Exit Sub
 
@@ -230,12 +260,25 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
     Conn.Execute sql
 
     RecarregarFluxoCaixa
-    MsgBox "Conta Lan√ßada!", vbInformation
+    MsgBox "Conta LanÁada!", vbInformation
     Unload Me
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "Contas - btnSalvar"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 
-Private Sub btneditar_click()
+Private Sub btnEditar_Click()
 
 On Error GoTo TratarErro
 
@@ -262,9 +305,18 @@ On Error GoTo TratarErro
     
 Exit Sub
 
+    Exit Sub
+
 TratarErro:
 
-MsgBox " erro: " & Err.Description, vbCritical
+    modSistema.tela = "Contas - Editar Conta"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 

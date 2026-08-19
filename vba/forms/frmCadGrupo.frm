@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCadGrupo
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   11145
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmCadGrupo.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmCadGrupo"
@@ -23,7 +23,7 @@ Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift
 
 End Sub
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
 
     CarregarProdutosCombo cmbProduto, True
 
@@ -72,7 +72,7 @@ Private Sub AjustarLayout()
 
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
   lvItensGrupo.Visible = False
     DoEvents
@@ -149,7 +149,7 @@ Private Sub btnCriar_Click()
     Dim IdGrupo As Long
 
     If Trim(txtDescricao.Value) = "" Then
-        MsgBox "Informe a descriÃ§Ã£o do grupo."
+        MsgBox "Informe a descrição do grupo."
         Exit Sub
     End If
 
@@ -214,7 +214,7 @@ Private Sub btnAdicionar_Click()
     End If
 
     If Val(txtQuantidadeItem.Value) < 0 Then
-        MsgBox "Informe uma quantidade vÃ¡lida.", vbExclamation
+        MsgBox "Informe uma quantidade válida.", vbExclamation
         Exit Sub
     End If
 
@@ -289,7 +289,7 @@ Private Sub CarregarItensGrupo()
 
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     lvItensGrupo.ListItems.Clear
 
@@ -308,10 +308,10 @@ Private Sub CarregarItensGrupo()
 
     Do While Not rs.EOF
 
-        Set item = lvItensGrupo.ListItems.Add(, , rs!IDProduto)
+        Set ITEM = lvItensGrupo.ListItems.Add(, , rs!idproduto)
 
-        item.SubItems(1) = Nz(rs!NOME)
-        item.SubItems(2) = Nz(rs!QUANTIDADE)
+        ITEM.SubItems(1) = Nz(rs!NOME)
+        ITEM.SubItems(2) = Nz(rs!QUANTIDADE)
 
         rs.MoveNext
 

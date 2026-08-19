@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmPagamentos
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   7020
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmPagamentos.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmPagamentos"
@@ -17,7 +17,7 @@ Attribute VB_Exposed = False
 
 Public idvenda As Long
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
     Static Carregado As Boolean
 
@@ -28,7 +28,7 @@ Private Sub Userform_activate()
 
 End Sub
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
 
  With lvPagamentos
 
@@ -53,7 +53,7 @@ Public Sub CarregarPagamentos(ByVal idvenda As Long)
 
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     sql = "SELECT " & _
           "IDPAGAMENTO," & _
@@ -73,12 +73,12 @@ Public Sub CarregarPagamentos(ByVal idvenda As Long)
 
     Do Until rs.EOF
 
-        Set item = lvPagamentos.ListItems.Add(, , rs!IdPagamento)
+        Set ITEM = lvPagamentos.ListItems.Add(, , rs!IdPagamento)
 
-        item.SubItems(1) = rs!idvenda
-        item.SubItems(2) = rs!FORMAPAGAMENTO
-        item.SubItems(3) = Format(rs!ValorPago, "R$ #,##0.00")
-        item.SubItems(4) = Format(rs!DATAPAGAMENTO, "dd/mm/yyyy")
+        ITEM.SubItems(1) = rs!idvenda
+        ITEM.SubItems(2) = rs!FORMAPAGAMENTO
+        ITEM.SubItems(3) = Format(rs!ValorPago, "R$ #,##0.00")
+        ITEM.SubItems(4) = Format(rs!DATAPAGAMENTO, "dd/mm/yyyy")
 
         rs.MoveNext
 
@@ -109,7 +109,7 @@ Private Sub btnEstornar_Click()
     If Trim(valor & "") = "" Then Exit Sub
 
     If Not IsNumeric(valor) Then
-        MsgBox "Valor inv√°lido.", vbExclamation
+        MsgBox "Valor inv·lido.", vbExclamation
         Exit Sub
     End If
 

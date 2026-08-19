@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmMovimentoEstoque
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   19755
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmMovimentoEstoque.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmMovimentoEstoque"
@@ -15,7 +15,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Private Carregando As Boolean
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
 
     Carregando = True
 
@@ -36,7 +36,7 @@ Private Sub UserForm_initialize()
         .ColumnHeaders.Add , , "EST. POST.", 80
         .ColumnHeaders.Add , , "DATA", 100
         .ColumnHeaders.Add , , "USUARIO", 100
-        .ColumnHeaders.Add , , "OBSERVA√á√ÉO", 200
+        .ColumnHeaders.Add , , "OBSERVA«√O", 200
 
     End With
 
@@ -200,7 +200,7 @@ Private Sub ValidarPeriodo()
 
             If NzDate(cmbDataInicial.Value) > NzDate(cmbDataFinal.Value) Then
 
-                MsgBox "A data inicial n√£o pode ser maior que a data final.", vbExclamation
+                MsgBox "A data inicial n„o pode ser maior que a data final.", vbExclamation
 
 
                 cmbDataFinal.ListIndex = 0
@@ -241,7 +241,7 @@ Private Sub cmbTipoMovimento_Change()
 
 End Sub
 
-Private Sub cmbDataInicial_Change()
+Private Sub cmbDataInicial_change()
 
     If Carregando Then Exit Sub
     FormatarData cmbDataInicial
@@ -251,7 +251,7 @@ Private Sub cmbDataInicial_Change()
 End Sub
 
 
-Private Sub cmbDataFinal_Change()
+Private Sub cmbDataFinal_change()
 
     If Carregando Then Exit Sub
 FormatarData cmbDataFinal
@@ -261,7 +261,7 @@ FormatarData cmbDataFinal
 End Sub
 
 
-Private Sub cmbUsuario_Change()
+Private Sub cmbUsuario_change()
 
     If Carregando Then Exit Sub
 
@@ -373,7 +373,7 @@ On Error GoTo TratarErro
     Do While Not rs.EOF
 
 
-        With lvMovimento.ListItems.Add(, , Nz(rs!id))
+        With lvMovimento.ListItems.Add(, , Nz(rs!ID))
 
             .SubItems(1) = Nz(rs!PRODUTO)
             .SubItems(2) = Nz(rs!tipo)

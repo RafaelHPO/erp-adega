@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmProdutos
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   19755
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmProdutos.frx":0000
    ShowModal       =   0   'False
    StartUpPosition =   1  'CenterOwner
 End
@@ -14,6 +14,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+Private Carregando As Boolean
+
 Private Sub btnAcerto_Click()
 
     fraCombo.Visible = False
@@ -27,26 +30,6 @@ Private Sub btnCadCombo_Click()
     frmCadCombo.Show vbModal
 
 End Sub
-
-Private Sub btnCalculaPrecovenda_Click()
-
-    Dim rs As ADODB.Recordset
-    Dim sql As String
-    Dim MSG As String
-
-    sql = "CALL PROC_CALCULAPRECOVENDA()"
-    Set rs = Conn.Execute(sql)
-
-    MsgBox rs.Fields(0).Value, vbInformation
-
-    rs.Close
-    Set rs = Nothing
-
-    CarregarProdutos
-
-End Sub
-
-Private Carregando As Boolean
 
 Private Sub btnCombos_Click()
 
@@ -73,12 +56,12 @@ Private Sub btnEditarCombo_Click()
     Set rs = Conn.Execute(sql)
 
     If rs.EOF Then
-        MsgBox "Produto n√£o encontrado."
+        MsgBox "Produto n„o encontrado."
         Exit Sub
     End If
 
     If UCase(Nz(rs!tipo, "")) <> "COMBO" Then
-        MsgBox "O produto selecionado n√£o √© um combo.", vbExclamation
+        MsgBox "O produto selecionado n„o È um combo.", vbExclamation
         rs.Close
         Set rs = Nothing
         Exit Sub
@@ -94,8 +77,15 @@ Private Sub btnEditarCombo_Click()
 
 End Sub
 
+Private Sub lvProdutosCadastro_dblclick()
 
-Private Sub UserForm_initialize()
+    btnEditarProduto_Click
+
+End Sub
+
+Private Sub UserForm_Initialize()
+
+On Error GoTo TratarErro
 
     Carregando = True
 
@@ -112,7 +102,7 @@ Private Sub UserForm_initialize()
         .Add , , "NOME", 250
         .Add , , "ESTOQUE", 80
         .Add , , "CUSTO", 90
-        .Add , , "PRE√áO VENDA", 100
+        .Add , , "PRE«O VENDA", 100
         .Add , , "SALDO ESTOQUE", 100
         .Add , , "LUCRO ESTIMADO", 120
         .Add , , "TIPO", 80
@@ -151,12 +141,26 @@ CarregarCategorias cmbCategoria
     Carregando = False
     fraCombo.Visible = False
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmProdutos - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
     CarregarIndicadores
-
+    CarregarProdutos
+    
 End Sub
 
 Private Sub btnNovoProd_Click()
@@ -187,7 +191,7 @@ Private Sub cmbTipo_Change()
 
 End Sub
 
-Private Sub cmbStatus_Change()
+Private Sub cmbStatus_change()
 
     If Carregando Then Exit Sub
     AtualizarTela
@@ -249,9 +253,11 @@ End Sub
 
 Public Sub CarregarProdutos()
 
+On Error GoTo TratarErro
+
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     sql = "SELECT IDPRODUTO, UPPER(NOME) NOME, TIPO, " & _
           "ESTOQUEATUAL, CUSTOUNITARIO, PRECOVENDA, UPPER(STATUS) AS STATUS, " & _
@@ -269,16 +275,16 @@ Public Sub CarregarProdutos()
 
     Do While Not rs.EOF
 
-        Set item = lvProdutosCadastro.ListItems.Add(, , Nz(rs!IDProduto))
+        Set ITEM = lvProdutosCadastro.ListItems.Add(, , Nz(rs!idproduto))
 
-        item.SubItems(1) = Nz(rs!NOME)
-        item.SubItems(2) = Nz(rs!ESTOQUEATUAL)
-        item.SubItems(3) = Format(NzDbl(rs!CUSTOUNITARIO), "R$   #,##0.00")
-        item.SubItems(4) = Format(NzDbl(rs!PRECOVENDA), "R$   #,##0.00")
-        item.SubItems(5) = Format(NzDbl(rs!SALDOESTOQUE), "R$   #,##0.00")
-        item.SubItems(6) = Format(NzDbl(rs!LUCROESTIMADO), "R$   #,##0.00")
-        item.SubItems(7) = Nz(rs!tipo)
-        item.SubItems(8) = Nz(rs!STATUS)
+        ITEM.SubItems(1) = Nz(rs!NOME)
+        ITEM.SubItems(2) = Nz(rs!ESTOQUEATUAL)
+        ITEM.SubItems(3) = Format(NzDbl(rs!CUSTOUNITARIO), "R$   #,##0.00")
+        ITEM.SubItems(4) = Format(NzDbl(rs!PRECOVENDA), "R$   #,##0.00")
+        ITEM.SubItems(5) = Format(NzDbl(rs!SALDOESTOQUE), "R$   #,##0.00")
+        ITEM.SubItems(6) = Format(NzDbl(rs!LUCROESTIMADO), "R$   #,##0.00")
+        ITEM.SubItems(7) = Nz(rs!tipo)
+        ITEM.SubItems(8) = Nz(rs!STATUS)
 
         rs.MoveNext
 
@@ -286,6 +292,19 @@ Public Sub CarregarProdutos()
 
     rs.Close
     Set rs = Nothing
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmProdutos - carregar lv"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 
@@ -320,6 +339,8 @@ End Sub
 
 Private Sub btnEditarProduto_Click()
 
+On Error GoTo TratarErro
+
     fraCombo.Visible = False
 
     If lvProdutosCadastro.SelectedItem Is Nothing Then
@@ -343,36 +364,63 @@ Private Sub btnEditarProduto_Click()
     frmCadProduto.txtidproduto = lvProdutosCadastro.SelectedItem.Text
     frmCadProduto.Show vbModeless
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmProdutos - btnEditarProduto"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub btnExcluirProduto_Click()
+
+On Error GoTo TratarErro
 
     fraCombo.Visible = False
 
     Dim sql As String
     Dim resp As VbMsgBoxResult
-    Dim IDProduto As Long
+    Dim idproduto As Long
 
     If lvProdutosCadastro.SelectedItem Is Nothing Then
         MsgBox "Selecione um produto", vbExclamation
         Exit Sub
     End If
 
-    IDProduto = CLng(lvProdutosCadastro.SelectedItem.Text)
+    idproduto = CLng(lvProdutosCadastro.SelectedItem.Text)
 
     resp = MsgBox("Tem certeza que deseja excluir este produto?", _
                   vbYesNo + vbQuestion, _
-                  "Confirma√ß√£o")
+                  "ConfirmaÁ„o")
 
     If resp = vbNo Then Exit Sub
 
-    sql = "DELETE FROM TAB_PRODUTOS WHERE IDPRODUTO = " & IDProduto
+    sql = "DELETE FROM TAB_PRODUTOS WHERE IDPRODUTO = " & idproduto
 
     Conn.Execute sql
 
-    MsgBox "Produto exclu√≠do com sucesso!", vbInformation
+    MsgBox "Produto excluÌdo com sucesso!", vbInformation
 
     Call CarregarProdutos
+    
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmProdutos - btnExcluir"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
-

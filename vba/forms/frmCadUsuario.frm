@@ -1,11 +1,11 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCadUsuario 
-   Caption         =   "CADASTRO DE USÚARIO"
+   Caption         =   "CADASTRO DE US�ARIO"
    ClientHeight    =   4830
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   8010
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmCadUsuario.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmCadUsuario"
@@ -13,15 +13,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+Private Sub userform_activate()
 
-    If KeyCode = vbKeyEscape Then
-        Unload Me
-    End If
-
-End Sub
-
-Private Sub Userform_activate()
+    On Error GoTo TratarErro
 
     If Trim(Me.Tag) <> "" Then
 
@@ -37,13 +31,25 @@ Private Sub Userform_activate()
 
     End If
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadUsuario - activate"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub btnSalvar_Click()
 
-    '--------------------------------------------------
-    ' Variáveis
-    '--------------------------------------------------
+    On Error GoTo TratarErro
+
     Dim cmd As ADODB.Command
 
     Set cmd = New ADODB.Command
@@ -55,41 +61,46 @@ Private Sub btnSalvar_Click()
         .CommandType = adCmdStoredProc
 
         .CommandText = "PROC_CADASTRARUSUARIO"
-
-        ' Nome completo
+        
         .Parameters.Append .CreateParameter("P_NOME", adVarChar, adParamInput, 40, txtNome.Value)
-
-        ' Login
         .Parameters.Append .CreateParameter("P_USUARIO", adVarChar, adParamInput, 20, txtUsuario.Value)
-
-        ' Senha
         .Parameters.Append .CreateParameter("P_SENHA", adVarChar, adParamInput, 30, txtSenha.Value)
-
+        
         .Execute
 
     End With
 
-    MsgBox "Usuário cadastrado com sucesso!", vbInformation
+    MsgBox "Usu�rio cadastrado com sucesso!", vbInformation
 
     Set cmd = Nothing
 
 frmUsuarios.CarregarUsuarios
 
-Me.Hide
+Unload Me
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadUsuario - btnSalvar"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 
 Private Sub btnCancelar_Click()
 
-    ' Limpa os campos
     Call LimparCampos
-
-    ' Fecha o formulário
    Unload Me
 
 End Sub
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
     
     btnSalvarEdit.Visible = False
 
@@ -103,6 +114,8 @@ Public Sub LimparCampos()
 End Sub
 
 Private Sub CarregarUsuario()
+
+On Error GoTo TratarErro
 
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -120,10 +133,25 @@ Private Sub CarregarUsuario()
     rs.Close
     Set rs = Nothing
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadUsuario - CarregarUsuario"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 
 Private Sub btnSalvarEdit_Click()
+
+    On Error GoTo TratarErro
 
     Dim sql As String
 
@@ -135,13 +163,26 @@ Private Sub btnSalvarEdit_Click()
 
     Conn.Execute sql
 
-    MsgBox "Usuário atualizado com sucesso!", vbInformation
+    MsgBox "Usu�rio atualizado com sucesso!", vbInformation
     
 Conn.Execute sql
 
 frmUsuarios.CarregarUsuarios
 
 Unload Me
+
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadUsuario - btnSalvarEdit"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 

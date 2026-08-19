@@ -1,11 +1,11 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmConferencia 
-   Caption         =   "CONFER√äNCIA NOTAS DE ENTRADA"
+   Caption         =   "CONFER NCIA NOTAS DE ENTRADA"
    ClientHeight    =   8415.001
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   14460
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmConferencia.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmConferencia"
@@ -19,7 +19,9 @@ Public IdCompra As Long
 
 Private Sub btnAdcItens_Click()
 
-Dim item As ListItem
+On Error GoTo TratarErro
+
+Dim ITEM As ListItem
 Dim rs As ADODB.Recordset
 Dim rsProd As ADODB.Recordset
 Dim dados As Variant
@@ -28,16 +30,16 @@ Dim sql As String
 Dim MsgRetorno As String
 
 If IdCompra = 0 Then
-    MsgBox "Compra inv√°lida.", vbExclamation
+    MsgBox "Compra inv·lida.", vbExclamation
     Exit Sub
 End If
 
-'Valida√ß√£o
-For Each item In lvProdutosEntrada.ListItems
+'ValidaÁ„o
+For Each ITEM In lvProdutosEntrada.ListItems
 
-    If item.Checked Then
+    If ITEM.Checked Then
 
-        If item.Text = "SEM CADASTRO" Then
+        If ITEM.Text = "SEM CADASTRO" Then
             MsgBox "Existem produtos sem cadastro selecionados.", vbExclamation
             Exit Sub
         End If
@@ -54,45 +56,45 @@ If QtdeSelecionados = 0 Then
 End If
 
 'Processa
-For Each item In lvProdutosEntrada.ListItems
+For Each ITEM In lvProdutosEntrada.ListItems
 
-    If item.Checked Then
+    If ITEM.Checked Then
 
-        dados = Split(item.Tag, "|")
+        dados = Split(ITEM.Tag, "|")
 
         sql = "SELECT CODIGOBARRASCX,MEDIDACOMPRA,QUANTIDADECOMPRA,QUANTIDADEEMBALAGEM " & _
-              "FROM TAB_PRODUTOS WHERE IDPRODUTO=" & SqlNumero(item.Text)
+              "FROM TAB_PRODUTOS WHERE IDPRODUTO=" & SqlNumero(ITEM.Text)
 
         Set rsProd = Conn.Execute(sql)
 
         If rsProd.EOF Then
-            MsgBox "Produto ID " & item.Text & " n√£o encontrado.", vbExclamation
+            MsgBox "Produto ID " & ITEM.Text & " n„o encontrado.", vbExclamation
             GoTo ProximoItem
         End If
 
         If NzDbl(rsProd!QUANTIDADECOMPRA) <= 0 Then
-            MsgBox "Produto '" & item.SubItems(1) & "' possui Quantidade Compra inv√°lida.", vbExclamation
+            MsgBox "Produto '" & ITEM.SubItems(1) & "' possui Quantidade Compra inv·lida.", vbExclamation
             GoTo ProximoItem
         End If
 
         If NzDbl(rsProd!QUANTIDADEEMBALAGEM) <= 0 Then
-            MsgBox "Produto '" & item.SubItems(1) & "' possui Quantidade Embalagem inv√°lida.", vbExclamation
+            MsgBox "Produto '" & ITEM.SubItems(1) & "' possui Quantidade Embalagem inv·lida.", vbExclamation
             GoTo ProximoItem
         End If
 
         sql = "CALL PROC_ENTRADAPRODUTOS(" & _
               SqlNumero(IdCompra) & "," & _
               SqlNumero(IDUsuarioLogado) & "," & _
-              SqlNumero(item.Text) & "," & _
+              SqlNumero(ITEM.Text) & "," & _
               SqlNumero(dados(0)) & "," & _
               SqlTexto(dados(1)) & "," & _
               SqlTexto(Nz(rsProd!CODIGOBARRASCX)) & "," & _
               SqlTexto(Nz(rsProd!MEDIDACOMPRA)) & "," & _
               SqlNumero(NzDbl(rsProd!QUANTIDADECOMPRA)) & "," & _
               SqlNumero(NzDbl(rsProd!QUANTIDADEEMBALAGEM)) & "," & _
-              SqlNumero(item.SubItems(3)) & "," & _
+              SqlNumero(ITEM.SubItems(3)) & "," & _
               SqlTexto("") & "," & _
-              SqlNumero(item.SubItems(5)) & ")"
+              SqlNumero(ITEM.SubItems(5)) & ")"
 
         Set rs = Conn.Execute(sql)
 
@@ -150,9 +152,24 @@ End With
 
 Unload Me
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmConferencia - btnAdcItens"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
+
+On Error GoTo TratarErro
 
     With lvProdutosEntrada
 
@@ -173,9 +190,22 @@ Private Sub UserForm_initialize()
 
     End With
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmConferencia - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
     Static Carregado As Boolean
 
@@ -186,7 +216,7 @@ Private Sub Userform_activate()
     Carregado = True
 
 End Sub
-Public Function ItemJaLancadoCompra(ByVal IdCompra As Long, ByVal IDProduto As Long) As Boolean
+Public Function ItemJaLancadoCompra(ByVal IdCompra As Long, ByVal idproduto As Long) As Boolean
 
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -194,7 +224,7 @@ Public Function ItemJaLancadoCompra(ByVal IdCompra As Long, ByVal IDProduto As L
     sql = "SELECT COUNT(*) AS QTDE " & _
           "FROM tab_itenscompra " & _
           "WHERE IDCOMPRA = " & SqlNumero(IdCompra) & _
-          " AND IDPRODUTO = " & SqlNumero(IDProduto)
+          " AND IDPRODUTO = " & SqlNumero(idproduto)
 
     Set rs = Conn.Execute(sql)
 
@@ -230,7 +260,7 @@ Public Function BuscarProdutoXML_Geral(ByVal CodigoBarras As String, ByVal Codig
     Set rs = Conn.Execute(sql)
 
     If Not rs.EOF Then
-        BuscarProdutoXML_Geral = CLng(rs!IDProduto)
+        BuscarProdutoXML_Geral = CLng(rs!idproduto)
     Else
         BuscarProdutoXML_Geral = Empty
     End If
@@ -242,11 +272,13 @@ End Function
 
 Private Sub CarregarProdutosEntrada(ByVal NumeroNFE_XML As String)
 
+On Error GoTo TratarErro
+
     Dim ws As Worksheet
     Dim tb As ListObject
     Dim i As Long
-    Dim item As ListItem
-    Dim IDProduto As Variant
+    Dim ITEM As ListItem
+    Dim idproduto As Variant
     Dim CodFornecedor As String
     Dim CodBarras As String
 
@@ -264,25 +296,25 @@ Private Sub CarregarProdutosEntrada(ByVal NumeroNFE_XML As String)
             CodFornecedor = Nz(tb.DataBodyRange(i, tb.ListColumns("CODIGO FORNECEDOR").Index).Value)
             CodBarras = Nz(tb.DataBodyRange(i, tb.ListColumns("CODIGO BARRAS").Index).Value)
 
-            IDProduto = BuscarProdutoXML(CodBarras, CodFornecedor)
+            idproduto = BuscarProdutoXML(CodBarras, CodFornecedor)
 
-            If Not IsEmpty(IDProduto) Then
-                If ItemJaLancadoCompra(IdCompra, CLng(IDProduto)) Then GoTo ProximoItem
+            If Not IsEmpty(idproduto) Then
+                If ItemJaLancadoCompra(IdCompra, CLng(idproduto)) Then GoTo ProximoItem
             End If
 
-            If IsEmpty(IDProduto) Then
-                Set item = lvProdutosEntrada.ListItems.Add(, , "SEM CADASTRO")
+            If IsEmpty(idproduto) Then
+                Set ITEM = lvProdutosEntrada.ListItems.Add(, , "SEM CADASTRO")
             Else
-                Set item = lvProdutosEntrada.ListItems.Add(, , CStr(IDProduto))
+                Set ITEM = lvProdutosEntrada.ListItems.Add(, , CStr(idproduto))
             End If
 
-            item.SubItems(1) = Nz(tb.DataBodyRange(i, tb.ListColumns("NOME").Index).Value)
-            item.SubItems(2) = Nz(tb.DataBodyRange(i, tb.ListColumns("MEDIDA COMPRA").Index).Value)
-            item.SubItems(3) = NzDbl(tb.DataBodyRange(i, tb.ListColumns("QUANTIDADE").Index).Value)
-            item.SubItems(4) = Format(NzDbl(tb.DataBodyRange(i, tb.ListColumns("VALOR UNITARIO").Index).Value), "0.00")
-            item.SubItems(5) = Format(NzDbl(tb.DataBodyRange(i, tb.ListColumns("VALOR TOTAL").Index).Value), "0.00")
+            ITEM.SubItems(1) = Nz(tb.DataBodyRange(i, tb.ListColumns("NOME").Index).Value)
+            ITEM.SubItems(2) = Nz(tb.DataBodyRange(i, tb.ListColumns("MEDIDA COMPRA").Index).Value)
+            ITEM.SubItems(3) = NzDbl(tb.DataBodyRange(i, tb.ListColumns("QUANTIDADE").Index).Value)
+            ITEM.SubItems(4) = Format(NzDbl(tb.DataBodyRange(i, tb.ListColumns("VALOR UNITARIO").Index).Value), "0.00")
+            ITEM.SubItems(5) = Format(NzDbl(tb.DataBodyRange(i, tb.ListColumns("VALOR TOTAL").Index).Value), "0.00")
 
-            item.Tag = CodFornecedor & "|" & CodBarras
+            ITEM.Tag = CodFornecedor & "|" & CodBarras
 
         End If
 
@@ -291,31 +323,46 @@ ProximoItem:
     Next i
 
     If lvProdutosEntrada.ListItems.Count = 0 Then
-        MsgBox "Todos os produtos desta compra j√° foram lan√ßados.", vbInformation
+        MsgBox "Todos os produtos desta compra j· foram lanÁados.", vbInformation
         Unload Me
     End If
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmConferencia - carregar lv"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
-Private Function BuscarProdutoXML(ByVal CodigoBarras As String, ByVal CodigoFornecedor As String) As Variant
+Public Function BuscarProdutoXML(ByVal CodigoBarras As String, ByVal CodigoFornecedor As String) As Variant
 
     BuscarProdutoXML = BuscarProdutoXML_Geral(CodigoBarras, CodigoFornecedor)
 
 End Function
 Private Sub btnNovoProd_Click()
 
-Dim item As ListItem
+On Error GoTo TratarErro
+
+Dim ITEM As ListItem
 Dim dados As Variant
 
 If lvProdutosEntrada.SelectedItem Is Nothing Then Exit Sub
 
-Set item = lvProdutosEntrada.SelectedItem
+Set ITEM = lvProdutosEntrada.SelectedItem
 
-If item.Text <> "SEM CADASTRO" Then
-    MsgBox "Produto j√° cadastrado.", vbInformation
+If ITEM.Text <> "SEM CADASTRO" Then
+    MsgBox "Produto j· cadastrado.", vbInformation
     Exit Sub
 End If
 
-dados = Split(item.Tag, "|")
+dados = Split(ITEM.Tag, "|")
 
 With frmCadProduto
 
@@ -324,25 +371,53 @@ With frmCadProduto
     .txtCodFornecedor.Value = dados(0)
     .txtEAN.Value = dados(1)
 
-    .txtNome.Value = item.SubItems(1)
-    .cmbUMcompra.Value = item.SubItems(2)
-    .txtQtdeCompra.Value = item.SubItems(3)
-    .txtCusto.Value = item.SubItems(4)
+    .txtNome.Value = ITEM.SubItems(1)
+    .cmbUMcompra.Value = ITEM.SubItems(2)
+    .txtQtdeCompra.Value = ITEM.SubItems(3)
+    .txtCusto.Value = ITEM.SubItems(4)
 
 End With
 
 frmCadProduto.Show vbModal
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmConferencia - btnNovoProduto"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
-Public Sub AtualizarProdutoXML(ByVal IDProduto As Long)
+Public Sub AtualizarProdutoXML(ByVal idproduto As Long)
 
-Dim item As ListItem
+On Error GoTo TratarErro
+
+Dim ITEM As ListItem
 
 If lvProdutosEntrada.SelectedItem Is Nothing Then Exit Sub
 
-Set item = lvProdutosEntrada.SelectedItem
+Set ITEM = lvProdutosEntrada.SelectedItem
 
-item.Text = IDProduto
+ITEM.Text = idproduto
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmConferencia - sub att prod xml"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub

@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmAcerto
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   8355.001
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmAcerto.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmAcerto"
@@ -29,6 +29,8 @@ End Sub
 
 Private Sub btnSalvar_Click()
 
+    On Error GoTo TratarErro
+
     Dim sql As String
     Dim rs As ADODB.Recordset
 
@@ -38,7 +40,7 @@ Private Sub btnSalvar_Click()
     End If
 
     If Val(txtQuantidade.Value) <= 0 Then
-        MsgBox "Quantidade invÃ¡lida.", vbExclamation
+        MsgBox "Quantidade inválida.", vbExclamation
         Exit Sub
     End If
     
@@ -80,10 +82,22 @@ Private Sub btnSalvar_Click()
     cmbProduto.SetFocus
 frmProdutos.CarregarProdutos
 
+Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "ACERTO ESTOQUE"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
 
     CarregarProdutosCombo cmbProduto
 
@@ -104,17 +118,19 @@ End Sub
 
 Private Sub cmbProduto_afterupdate()
 
+On Error GoTo TratarErro
+
  Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim IDProduto As Long
+    Dim idproduto As Long
 
     If cmbProduto.ListIndex = -1 Then Exit Sub
 
-    IDProduto = CLng(cmbProduto.List(cmbProduto.ListIndex, 0))
+    idproduto = CLng(cmbProduto.List(cmbProduto.ListIndex, 0))
 
     sql = "SELECT ESTOQUEATUAL,TIPO " & _
           "FROM TAB_PRODUTOS " & _
-          "WHERE IDPRODUTO = " & IDProduto
+          "WHERE IDPRODUTO = " & idproduto
 
     Set rs = Conn.Execute(sql)
 
@@ -122,9 +138,9 @@ Private Sub cmbProduto_afterupdate()
 
  If UCase(Nz(rs!tipo, "")) = "COMBO" Then
 
-            MsgBox "Este produto Ã© um COMBO." & vbCrLf & _
+            MsgBox "Este produto é um COMBO." & vbCrLf & _
                    "Selecione um produto individual para continuar.", _
-                   vbExclamation, "Produto invÃ¡lido"
+                   vbExclamation, "Produto inválido"
 
             cmbProduto.Value = Null
             txtAtual.Value = ""
@@ -147,6 +163,19 @@ Private Sub cmbProduto_afterupdate()
     Set rs = Nothing
     
     txtQuantidade.SetFocus
+    
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "ACERTO - cmbProduto"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 

@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmFornecedores
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   12060
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmFornecedores.frx":0000
    ShowModal       =   0   'False
    StartUpPosition =   1  'CenterOwner
 End
@@ -14,7 +14,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
+
+On Error GoTo TratarErro
 
     With lvFornecedores
         .View = lvwReport
@@ -37,6 +39,20 @@ CarregarFornecedores
 
 cmbStatus.List = Array("TODOS", "ATIVO", "INATIVO")
 cmbStatus.ListIndex = 1
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "Fornecedores - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 Private Sub btnNovoFornecedor_Click()
 
@@ -50,18 +66,20 @@ Private Sub cmbFornecedor_Change()
 End Sub
 
 
-Private Sub cmbStatus_Change()
+Private Sub cmbStatus_change()
 
     CarregarFornecedores
 
 End Sub
 Public Sub CarregarFornecedores()
 
+On Error GoTo TratarErro
+
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
     Dim filtroFornecedor As String
-    Dim filtroStatus As String
+    Dim FiltroStatus As String
 
 
     sql = "SELECT IDFORNECEDOR,NOME,CNPJ,CONTATO,STATUS FROM TAB_FORNECEDORES WHERE 1=1 "
@@ -74,8 +92,8 @@ Public Sub CarregarFornecedores()
 
 
     If cmbStatus.Value <> "TODOS" And cmbStatus.Value <> "" Then
-        filtroStatus = cmbStatus.Value
-        sql = sql & " AND STATUS = '" & filtroStatus & "'"
+        FiltroStatus = cmbStatus.Value
+        sql = sql & " AND STATUS = '" & FiltroStatus & "'"
     Else
         sql = sql & " AND STATUS = 'ATIVO'"
     End If
@@ -93,12 +111,12 @@ Public Sub CarregarFornecedores()
 
     Do While Not rs.EOF
 
-        Set item = lvFornecedores.ListItems.Add(, , Nz(rs!idFornecedor))
+        Set ITEM = lvFornecedores.ListItems.Add(, , Nz(rs!idFornecedor))
 
-        item.SubItems(1) = Nz(rs!NOME)
-        item.SubItems(2) = Nz(rs!CNPJ)
-        item.SubItems(3) = Nz(rs!CONTATO)
-        item.SubItems(4) = Nz(rs!STATUS)
+        ITEM.SubItems(1) = Nz(rs!NOME)
+        ITEM.SubItems(2) = Nz(rs!CNPJ)
+        ITEM.SubItems(3) = Nz(rs!CONTATO)
+        ITEM.SubItems(4) = Nz(rs!STATUS)
 
         rs.MoveNext
 
@@ -107,6 +125,19 @@ Public Sub CarregarFornecedores()
 
     rs.Close
     Set rs = Nothing
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "Fornecedores - carregar lv"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 Private Sub btnEditarFornecedor_Click()
@@ -124,9 +155,11 @@ End Sub
 
 Private Sub btnExcluirFornecedor_Click()
 
+On Error GoTo TratarErro
+
     Dim sql As String
     Dim resp As VbMsgBoxResult
-    Dim IDProduto As Long
+    Dim idproduto As Long
 
     If lvFornecedores.SelectedItem Is Nothing Then
         MsgBox "Selecione um fornecedor", vbExclamation
@@ -137,7 +170,7 @@ Private Sub btnExcluirFornecedor_Click()
 
     resp = MsgBox("Tem certeza que deseja excluir este fornecedor?", _
                   vbYesNo + vbQuestion, _
-                  "ConfirmaÃ§Ã£o")
+                  "Confirmação")
 
     If resp = vbNo Then Exit Sub
 
@@ -145,9 +178,22 @@ Private Sub btnExcluirFornecedor_Click()
 
     Conn.Execute sql
 
-    MsgBox "Fornecedor excluÃ­do com sucesso!", vbInformation
+    MsgBox "Fornecedor excluído com sucesso!", vbInformation
 
     Call CarregarFornecedores   ' recarrega o ListView
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "Fornecedores - btnExcluir"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 

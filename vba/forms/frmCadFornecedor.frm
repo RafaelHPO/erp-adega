@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCadFornecedor
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   8010
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmCadFornecedor.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmCadFornecedor"
@@ -13,22 +13,14 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-
-    If KeyCode = vbKeyEscape Then
-        Unload Me
-    End If
-
-End Sub
-
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
 
 btnSalvarEdit.Visible = False
 btnCancelarEdit.Visible = False
 
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
 ckAtivo.Value = True
 
@@ -49,11 +41,8 @@ ckAtivo.Value = True
 End Sub
 
 Private Sub btnCancelar_Click()
-
-    ' Limpa os campos
-    Call LimparCampos
-
-    ' Fecha o formulário
+    
+    LimparCampos
     Unload Me
 
 End Sub
@@ -71,9 +60,8 @@ End Sub
 
 Private Sub btnSalvar_Click()
 
-    '--------------------------------------------------
-    ' Variáveis
-    '--------------------------------------------------
+On Error GoTo TratarErro
+
     Dim cmd As ADODB.Command
     
     '====================================================
@@ -126,10 +114,24 @@ frmFornecedores.CarregarFornecedores
 
 Unload Me
 
+Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "Cadastro Fornecedor"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
-
 Private Sub CarregarFornecedor()
+
+    On Error GoTo TratarErro
 
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -157,11 +159,26 @@ Private Sub CarregarFornecedor()
 
     rs.Close
     Set rs = Nothing
+    
+Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CADFORNECEDOR - CARREGARFORNECEDOR"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 
 Private Sub btnSalvarEdit_Click()
 
+    On Error GoTo TratarErro
+    
     Dim sql As String
     Dim StatusFornecedor As String
 
@@ -191,11 +208,24 @@ frmFornecedores.CarregarFornecedores
 
 Unload Me
 
+Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CADFORNECEDOR - btnSalvarEdit"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub btnCancelarEdit_Click()
 
-    ' Fecha o formulário
+    ' Fecha o formul�rio
     Unload Me
 
 End Sub

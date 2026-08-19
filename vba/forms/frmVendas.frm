@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmVendas
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   19755
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmVendas.frx":0000
    ShowModal       =   0   'False
    StartUpPosition =   1  'CenterOwner
 End
@@ -16,7 +16,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Private FiltroDataIni As Date
 Private FiltroDataFim As Date
-Private filtroStatus As String
+Private FiltroStatus As String
 Private FiltroUsuario As Long
 Private UsarFiltroUsuario As Boolean
 
@@ -26,17 +26,17 @@ fraCaixa.Visible = False
 
 If Not SolicitarSenhaCaixa() Then Exit Sub
     '====================================================
-    ' VALIDA SE J√Å EXISTE CAIXA ABERTO
+    ' VALIDA SE J¡ EXISTE CAIXA ABERTO
     '====================================================
     If ExisteCaixaAberto Then
 
-        MsgBox "J√° existe um caixa aberto.", vbExclamation
+        MsgBox "J· existe um caixa aberto.", vbExclamation
         Exit Sub
 
     End If
 
     '====================================================
-    ' DECLARA√á√ÉO DAS VARI√ÅVEIS
+    ' DECLARA«√O DAS VARI¡VEIS
     '====================================================
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -53,7 +53,7 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
 
     If Not IsNumeric(Retorno) Then
 
-        MsgBox "Informe um valor num√©rico v√°lido.", vbExclamation
+        MsgBox "Informe um valor numÈrico v·lido.", vbExclamation
         Exit Sub
 
     End If
@@ -62,7 +62,7 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
 
     If Fundo < 0 Then
 
-        MsgBox "O fundo inicial n√£o pode ser negativo.", vbExclamation
+        MsgBox "O fundo inicial n„o pode ser negativo.", vbExclamation
         Exit Sub
 
     End If
@@ -87,7 +87,7 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
             frmPrincipal.txtStatusCaixa.Value = "ABERTO"
             frmPrincipal.txtIdCaixa.Value = rs("IDCAIXA")
 
-            MsgBox "Caixa N¬∫ " & rs("IDCAIXA") & _
+            MsgBox "Caixa N∫ " & rs("IDCAIXA") & _
                    " aberto com fundo de R$ " & _
                    Format(rs("FUNDO"), "0.00"), _
                    vbInformation
@@ -162,7 +162,7 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
 
     If Not IsNumeric(RetornoValor) Then
 
-        MsgBox "Informe um valor num√©rico v√°lido.", vbExclamation
+        MsgBox "Informe um valor numÈrico v·lido.", vbExclamation
         Exit Sub
 
     End If
@@ -198,11 +198,11 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
 
     ElseIf CampoExiste(rs, "ERRO") Then
 
-        MsgBox rs!Erro, vbExclamation
+        MsgBox rs!erro, vbExclamation
 
     Else
 
-        MsgBox "A opera√ß√£o foi conclu√≠da, por√©m a procedure n√£o retornou uma mensagem.", vbInformation
+        MsgBox "A operaÁ„o foi concluÌda, porÈm a procedure n„o retornou uma mensagem.", vbInformation
 
     End If
 
@@ -222,7 +222,7 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
     If Not MostrarResumoCaixa("fechar o caixa") Then Exit Sub
 
     '====================================================
-    ' DECLARA√á√ÉO DAS VARI√ÅVEIS
+    ' DECLARA«√O DAS VARI¡VEIS
     '====================================================
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -304,18 +304,34 @@ Private Sub btnEditarVenda_Click()
 End Sub
 
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
+
+On Error GoTo TratarErro
 
 fraCaixa.Visible = False
 
-    Call ResumoOperacional
     Call CarregarVendas
     ValidarCaixaOperacional
+    
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmVendas - activate"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
     
 End Sub
 
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
+
+On Error GoTo TratarErro
 
     With lvVendas
 
@@ -333,7 +349,7 @@ Private Sub UserForm_initialize()
         .ColumnHeaders.Add , , "DESCONTO", 110
         .ColumnHeaders.Add , , "VALOR FINAL", 110
         .ColumnHeaders.Add , , "STATUS", 90
-        .ColumnHeaders.Add , , "USU√ÅRIO", 120
+        .ColumnHeaders.Add , , "USU¡RIO", 120
         .ColumnHeaders.Add , , "DIAS PENDENTE", 110
 
     End With
@@ -343,7 +359,6 @@ Private Sub UserForm_initialize()
     CarregarCmbStatus
 
     CarregarVendas
-    ResumoOperacional
 
 btnExibir.Visible = True
 btnOcultar.Visible = False
@@ -356,8 +371,23 @@ txtVendido.PasswordChar = "*"
 txtTm.PasswordChar = "*"
 txtCaixa.PasswordChar = "*"
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmVendas - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 Public Sub CarregarVendas()
+
+On Error GoTo TratarErro
 
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -382,7 +412,7 @@ Public Sub CarregarVendas()
       "WHERE 1=1 "
 
 '========================================
-' STATUS + PER√çODO
+' STATUS + PERÕODO
 '========================================
 
 If cmbStatus.Value <> "" And cmbStatus.Value <> "TODOS" Then
@@ -432,7 +462,7 @@ Else
 
 End If
     '========================================
-    ' USU√ÅRIO
+    ' USU¡RIO
     '========================================
     If cmbUsuario.Value <> "" And cmbUsuario.Value <> "TODOS" Then
 
@@ -478,7 +508,7 @@ End If
           "CASE WHEN V.STATUS = 'ABERTO' THEN 0 ELSE 1 END, " & _
           "V.IDVENDA DESC"
 
-    Set rs = Conn.Execute(sql)
+Set rs = Conn.Execute(sql)
 
     lvVendas.ListItems.Clear
 
@@ -516,9 +546,24 @@ End With
     Set rs = Nothing
 
     ResumoOperacional
+    
+        Exit Sub
 
+TratarErro:
+
+    modSistema.tela = "frmVendas - carregar lv"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+    
 End Sub
 Private Sub btnCancelarVenda_Click()
+
+On Error GoTo TratarErro
 
 If Not SolicitarSenhaCaixa() Then Exit Sub
 
@@ -567,14 +612,29 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
 
 ResumoOperacional
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmVendas - CancelarVenda"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 Private Sub btnAbrirVenda_Click()
+
+On Error GoTo TratarErro
 
     Dim cmd As ADODB.Command
     Dim rs As ADODB.Recordset
 
     If UCase(Trim(frmPrincipal.txtStatusCaixa.Value)) <> "ABERTO" Then
-        MsgBox "N√£o existe caixa aberto.", vbExclamation
+        MsgBox "N„o existe caixa aberto.", vbExclamation
         Exit Sub
     End If
 
@@ -601,9 +661,20 @@ Private Sub btnAbrirVenda_Click()
     rs.Close
     Set rs = Nothing
     
-  
-    
     frmPedido.Show
+    
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmVendas - novavenda"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 Public Sub ResumoOperacional()
@@ -649,7 +720,7 @@ Public Sub ResumoOperacional()
     rs.Close
 
     '========================
-    ' TICKET M√âDIO
+    ' TICKET M…DIO
     '========================
     If qtde > 0 Then
         txtTm.Value = Format(Total / qtde, "0.00")
@@ -681,7 +752,7 @@ Public Sub ResumoOperacional()
           "COALESCE((SELECT SUM(P.VALORPAGO) FROM tab_pagamentos P WHERE P.IDVENDA = V.IDVENDA), 0) AS PAGO " & _
           "FROM tab_vendas V JOIN TAB_ITENSVENDA IV ON IV.IDVENDA = V.IDVENDA " & _
           "WHERE V.STATUS = 'ABERTO' GROUP BY V.IDVENDA ) V "
-          
+    
     Set rs = Conn.Execute(sql)
 
 If Not rs.EOF Then
@@ -725,7 +796,7 @@ Private Function FiltroVendas() As String
     cond = " WHERE 1=1 "
 
     '========================
-    ' USU√ÅRIO
+    ' USU¡RIO
     '========================
     If cmbUsuario.Value <> "" And cmbUsuario.Value <> "TODOS" Then
 
@@ -735,7 +806,7 @@ Private Function FiltroVendas() As String
     End If
 
     '========================
-    ' STATUS + PER√çODO
+    ' STATUS + PERÕODO
     '========================
     If cmbStatus.Value <> "" And cmbStatus.Value <> "TODOS" Then
 
@@ -860,30 +931,30 @@ Private Sub CarregarCmbStatus()
 
 End Sub
 
-Private Sub cmbDataInicial_Change()
+Private Sub cmbDataInicial_change()
 FormatarDatacmb cmbDataInicial
     ValidarPeriodo
     CarregarVendas
-    ResumoOperacional
+    
 
 End Sub
 
-Private Sub cmbDataFinal_Change()
+Private Sub cmbDataFinal_change()
+
 FormatarDatacmb cmbDataFinal
     ValidarPeriodo
     CarregarVendas
-    ResumoOperacional
 
 End Sub
 
-Private Sub cmbUsuario_Change()
+Private Sub cmbUsuario_change()
     CarregarVendas
-    ResumoOperacional
+    
 End Sub
 
-Private Sub cmbStatus_Change()
+Private Sub cmbStatus_change()
     CarregarVendas
-    ResumoOperacional
+
 End Sub
 
 Private Sub ValidarPeriodo()
@@ -893,7 +964,7 @@ Private Sub ValidarPeriodo()
 
         If NzDate(cmbDataInicial.Value) > NzDate(cmbDataFinal.Value) Then
 
-            MsgBox "A data inicial n√£o pode ser maior que a data final.", vbExclamation
+            MsgBox "A data inicial n„o pode ser maior que a data final.", vbExclamation
 
             cmbDataFinal.ListIndex = 0
 

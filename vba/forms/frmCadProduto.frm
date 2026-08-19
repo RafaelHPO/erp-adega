@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCadProduto
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   13755
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmCadProduto.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmCadProduto"
@@ -22,15 +22,9 @@ FormatarMoeda txtPrecoVenda
 
 End Sub
 
-Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+Private Sub UserForm_Initialize()
 
-    If KeyCode = vbKeyEscape Then
-        Unload Me
-    End If
-
-End Sub
-
-Private Sub UserForm_initialize()
+    On Error GoTo TratarErro
 
     ckAtivo.Value = True
 
@@ -67,9 +61,24 @@ btnEx.Visible = False
 txtMarkup.Locked = True
 txtSugerido.Locked = True
         
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadProduto - Initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+        
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
+    
+    On Error GoTo TratarErro
     
     If Trim(txtidproduto) <> "" Then
     CarregarProduto
@@ -99,6 +108,19 @@ With lvsubgrupos
     
     End With
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadProduto - Activate"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub txtCusto_Change()
@@ -109,46 +131,9 @@ FormatarMoeda txtCusto
 
 End Sub
 
-'Private Sub txtCusto_AfterUpdate()
-'
- '   Dim Resposta As VbMsgBoxResult
-  '  Dim Custo As Double
-'
-'    Custo = NzDbl(txtCusto.Value)
-'
- '   Resposta = MsgBox( _
-  '      "Confirmar custo de R$ " & _
-   '     Format(Custo, "#,##0.00") & " ?", _
-    '    vbYesNo + vbQuestion, _
-     '   "Confirmação de Custo")
-'
- '   If Resposta = vbNo Then
-'
- '       txtCusto.SetFocus
-  '      txtCusto.SelStart = 0
-   '     txtCusto.SelLength = Len(txtCusto.Text)
-'
- '       Exit Sub
-'
- '   End If
-'
- '   If Custo >= 2000 Then
-''
-  '      MsgBox "ATENÇÃO CRÍTICA: custo de R$ " & _
-   '            Format(Custo, "#,##0.00") & _
-    '           ". Valor de custo muito elevado. Revise o cadastro.", _
-     '          vbCritical
-'
- '   ElseIf Custo >= 1000 Then
-'
- '       MsgBox "ATENÇÃO: custo de R$ " & _
-  '             Format(Custo, "#,##0.00") & _
-   '            ". Verifique se o valor foi digitado corretamente.", _
-    '           vbExclamation
- '   End If
-'
-'End Sub
 Private Sub btnSalvarEdit_Click()
+
+On Error GoTo TratarErro
 
 Dim Custo As Double
 
@@ -162,7 +147,7 @@ If Custo >= 2000 Then
 ElseIf Custo >= 1000 Then
 
     If MsgBox( _
-        "ATENÇÃO!" & vbCrLf & vbCrLf & _
+        "ATEN��O!" & vbCrLf & vbCrLf & _
         "Custo informado: R$ " & Format(Custo, "#,##0.00") & vbCrLf & _
         "Deseja realmente continuar?", _
         vbYesNo + vbExclamation) = vbNo Then
@@ -219,8 +204,23 @@ End If
 
     Unload Me
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadProduto - SalvarEdit"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 Private Sub btnSalvar_Click()
+
+On Error GoTo TratarErro
 
 Dim Custo As Double
 
@@ -234,7 +234,7 @@ If Custo >= 2000 Then
 ElseIf Custo >= 1000 Then
 
     If MsgBox( _
-        "ATENÇÃO!" & vbCrLf & vbCrLf & _
+        "ATEN��O!" & vbCrLf & vbCrLf & _
         "Custo informado: R$ " & Format(Custo, "#,##0.00") & vbCrLf & _
         "Deseja realmente continuar?", _
         vbYesNo + vbExclamation) = vbNo Then
@@ -329,11 +329,25 @@ Else
 
 End If
 
-
 Unload Me
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadProduto - btnSalvar"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 Public Sub CarregarProduto()
+
+On Error GoTo TratarErro
 
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -372,8 +386,23 @@ Public Sub CarregarProduto()
     rs.Close
     Set rs = Nothing
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadProduto - CarregarProduto"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 Public Sub carregarsubgrupos(cmb As ComboBox)
+
+On Error GoTo TratarErro
 
     Dim rs As ADODB.Recordset
 
@@ -399,41 +428,30 @@ Public Sub carregarsubgrupos(cmb As ComboBox)
     rs.Close
     Set rs = Nothing
 
-End Sub
+    Exit Sub
 
-Public Sub CarregarUsuarios()
+TratarErro:
 
-    Dim rs As ADODB.Recordset
-    Dim sql As String
-    Dim item As ListItem
+    modSistema.tela = "CadProduto - Subgrupo CMB"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
 
-    sql = "SELECT IDUSUARIO, NOME, USUARIO FROM TAB_USUARIOS"
-
-    Set rs = New ADODB.Recordset
-    rs.Open sql, Conn, adOpenStatic, adLockReadOnly
-
-    lvUsuarios.ListItems.Clear
-
-    Do While Not rs.EOF
-
-        Set item = lvUsuarios.ListItems.Add(, , rs!idUsuario)
-        item.SubItems(1) = rs!NOME
-        item.SubItems(2) = rs!Usuario
-
-        rs.MoveNext
-    Loop
-
-    rs.Close
-    Set rs = Nothing
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
+
 Private Sub CarregarGrupos()
+
+    On Error GoTo TratarErro
 
     If Trim(txtidproduto.Value) = "" Then Exit Sub
     
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
     
     sql = "SELECT g.idgrupo AS ID, g.descricao AS SUBGRUPO " & _
           "FROM tab_produtosgrupo pg " & _
@@ -447,14 +465,27 @@ Private Sub CarregarGrupos()
     
     Do While Not rs.EOF
     
-        Set item = lvsubgrupos.ListItems.Add(, , rs!id)
-        item.SubItems(1) = rs!SUBGRUPO
+        Set ITEM = lvsubgrupos.ListItems.Add(, , rs!ID)
+        ITEM.SubItems(1) = rs!SUBGRUPO
     
         rs.MoveNext
     Loop
     
     rs.Close
     Set rs = Nothing
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadProduto - LV SubGrupo"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 Private Sub cmbCategoria_Change()
@@ -506,9 +537,6 @@ End Sub
 
 Private Sub btnCancelarEdit_Click()
 
-    '====================================================
-    ' FECHA O FORMULÁRIO
-    '====================================================
     Unload Me
 
 End Sub
@@ -516,9 +544,6 @@ End Sub
 
 Private Sub btnFechar_Click()
 
-    '====================================================
-    ' FECHA O FORMULÁRIO
-    '====================================================
     Unload Me
 
 End Sub

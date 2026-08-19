@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmVendaDiaria
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   10860
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmVendaDiaria.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmVendaDiaria"
@@ -18,7 +18,7 @@ Option Explicit
 Public ano As Long
 Public mes As Long
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
 
     With lvVendaDiaria
     
@@ -40,7 +40,7 @@ Private Sub UserForm_initialize()
 
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
     CarregarVendasMes
 
@@ -50,7 +50,7 @@ Private Sub CarregarVendasMes()
 
     Dim sql As String
     Dim rs As ADODB.Recordset
-    Dim item As ListItem
+    Dim ITEM As ListItem
     
 sql = "SELECT V.DATAVENDA AS DATA, " & _
         "SUM(V.VALORFINAL) AS TOTAL, C.CUSTO AS CUSTO, SUM(V.VALORFINAL) - C.CUSTO AS LUCRO, " & _
@@ -67,12 +67,12 @@ sql = "SELECT V.DATAVENDA AS DATA, " & _
     
 Do While Not rs.EOF
    
-   Set item = lvVendaDiaria.ListItems.Add(, , rs!Data)
+   Set ITEM = lvVendaDiaria.ListItems.Add(, , rs!Data)
 
-   item.ListSubItems.Add , , Format(NzDbl(rs!Total), "R$   #,##0.00")
-   item.ListSubItems.Add , , Format(NzDbl(rs!Custo), "R$   #,##0.00")
-   item.ListSubItems.Add , , Format(NzDbl(rs!lucro), "R$   #,##0.00")
-   item.ListSubItems.Add , , Format(NzDbl(rs!margem) / 100, "0.00%")
+   ITEM.ListSubItems.Add , , Format(NzDbl(rs!Total), "R$   #,##0.00")
+   ITEM.ListSubItems.Add , , Format(NzDbl(rs!Custo), "R$   #,##0.00")
+   ITEM.ListSubItems.Add , , Format(NzDbl(rs!lucro), "R$   #,##0.00")
+   ITEM.ListSubItems.Add , , Format(NzDbl(rs!margem) / 100, "0.00%")
    
 rs.MoveNext
 

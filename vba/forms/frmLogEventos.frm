@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmLogEventos
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   13620
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmLogEventos.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmLogEventos"
@@ -15,7 +15,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Private Carregando As Boolean
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
 
 Carregando = True
     With lvLog
@@ -28,7 +28,7 @@ Carregando = True
     
     .ColumnHeaders.Add , , "ID", 50
     .ColumnHeaders.Add , , "TIPO", 90
-    .ColumnHeaders.Add , , "DESCRI√á√ÉO", 220
+    .ColumnHeaders.Add , , "DESCRI«√O", 220
     .ColumnHeaders.Add , , "ID RELACIONADO", 90
     .ColumnHeaders.Add , , "DATA", 100
     .ColumnHeaders.Add , , "USUARIO", 90
@@ -70,7 +70,7 @@ If Carregando Then Exit Sub
     AtualizarTela
 End Sub
 
-Private Sub cmbDataInicial_Change()
+Private Sub cmbDataInicial_change()
 
     If Carregando Then Exit Sub
 FormatarDatacmb cmbDataInicial
@@ -80,7 +80,7 @@ FormatarDatacmb cmbDataInicial
 End Sub
 
 
-Private Sub cmbDataFinal_Change()
+Private Sub cmbDataFinal_change()
 
     If Carregando Then Exit Sub
 FormatarDatacmb cmbDataFinal
@@ -89,7 +89,7 @@ FormatarDatacmb cmbDataFinal
 
 End Sub
 
-Private Sub cmbUsuario_Change()
+Private Sub cmbUsuario_change()
 If Carregando Then Exit Sub
     AtualizarTela
 End Sub
@@ -150,7 +150,7 @@ End If
 
     Do While Not rs.EOF
 
-        With lvLog.ListItems.Add(, , Nz(rs!id))
+        With lvLog.ListItems.Add(, , Nz(rs!ID))
             .SubItems(1) = Nz(rs!tipo)
             .SubItems(2) = Nz(rs!DESCRICAO)
             .SubItems(3) = NzDbl(rs!IDRELACIONADO)
@@ -257,7 +257,7 @@ With cmbUsuario
 
     Do While Not rs.EOF
 
-        .AddItem rs!id
+        .AddItem rs!ID
         .List(.ListCount - 1, 1) = rs!Usuario
 
         rs.MoveNext
@@ -356,7 +356,7 @@ Private Sub ValidarPeriodo()
 
             If NzDate(cmbDataInicial.Value) > NzDate(cmbDataFinal.Value) Then
 
-                MsgBox "A data inicial n√£o pode ser maior que a data final.", vbExclamation
+                MsgBox "A data inicial n„o pode ser maior que a data final.", vbExclamation
 
 
                 cmbDataFinal.ListIndex = 0

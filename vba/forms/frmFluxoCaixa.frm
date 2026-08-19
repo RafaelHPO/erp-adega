@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmFluxoCaixa
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   18765
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmFluxoCaixa.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmFluxoCaixa"
@@ -17,16 +17,18 @@ Option Explicit
 
 Private Sub lvFluxoCaixa_DblClick()
 
+On Error GoTo TratarErro
+
 Dim dados() As String
 Dim ano As Long
 Dim mes As Long
-Dim item As ListItem
+Dim ITEM As ListItem
 
-Set item = lvFluxoCaixa.SelectedItem
+Set ITEM = lvFluxoCaixa.SelectedItem
 
-If item Is Nothing Then Exit Sub
+If ITEM Is Nothing Then Exit Sub
 
-dados = Split(item.Tag, "|")
+dados = Split(ITEM.Tag, "|")
 
 ano = CLng(dados(0))
 mes = CLng(dados(1))
@@ -35,9 +37,24 @@ mes = CLng(dados(1))
     frmVendaDiaria.mes = mes
     frmVendaDiaria.Show vbModal
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "FluxoCaixa - LVFluxo DBLCLICK"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub lvPagar_DblClick()
+
+On Error GoTo TratarErro
 
     If lvPagar.SelectedItem Is Nothing Then Exit Sub
 
@@ -49,9 +66,24 @@ Private Sub lvPagar_DblClick()
         .Show
     End With
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "FluxoCaixa - lvpagar dblclick"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub lvReceber_DblClick()
+
+On Error GoTo TratarErro
 
     If lvReceber.SelectedItem Is Nothing Then Exit Sub
 
@@ -62,6 +94,19 @@ Private Sub lvReceber_DblClick()
         .CarregarConta
         .Show
     End With
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "FluxoCaixa - lvreceber dblclick"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 
@@ -77,13 +122,15 @@ Private Sub btnNovaConta_Click()
 
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
     CarregarFluxoCaixa
 
 End Sub
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
+
+On Error GoTo TratarErro
 
     With lvFluxoCaixa
 
@@ -97,12 +144,12 @@ Private Sub UserForm_initialize()
         .ListItems.Clear
 
         .ColumnHeaders.Add , , "ANO", 50
-        .ColumnHeaders.Add , , "M√äS", 70
+        .ColumnHeaders.Add , , "M S", 70
         .ColumnHeaders.Add , , "ENTRADAS", 80
-        .ColumnHeaders.Add , , "SA√çDAS", 80
+        .ColumnHeaders.Add , , "SAÕDAS", 80
         .ColumnHeaders.Add , , "SALDO", 80
-        .ColumnHeaders.Add , , "N¬∞ PEDIDOS", 80
-        .ColumnHeaders.Add , , "TICKET M√âDIO", 100
+        .ColumnHeaders.Add , , "N∞ PEDIDOS", 80
+        .ColumnHeaders.Add , , "TICKET M…DIO", 100
         .ColumnHeaders.Add , , "ACUMULADO", 100
 
     End With
@@ -111,11 +158,26 @@ Private Sub UserForm_initialize()
      PreencherLvPagar
     PreencherLvReceber
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "FluxoCaixa - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 Private Sub CarregarFluxoCaixa()
 
+On Error GoTo TratarErro
+
     Dim rs As New ADODB.Recordset
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     lvFluxoCaixa.ListItems.Clear
 
@@ -123,22 +185,22 @@ Private Sub CarregarFluxoCaixa()
 
     Do Until rs.EOF
 
-        Set item = lvFluxoCaixa.ListItems.Add(, , rs!ano)
+        Set ITEM = lvFluxoCaixa.ListItems.Add(, , rs!ano)
 
-        item.ListSubItems.Add , , UCase(Format(DateSerial(rs!ano, rs!mes, 1), "mmmm"))
-        item.ListSubItems.Add , , FormatCurrency(rs!ENTRADA)
-        item.ListSubItems.Add , , FormatCurrency(rs!SAIDA)
-        item.ListSubItems.Add , , FormatCurrency(rs!SALDO)
-        item.ListSubItems.Add , , rs!PEDIDOS
-        item.ListSubItems.Add , , FormatCurrency(rs!TM)
-        item.ListSubItems.Add , , FormatCurrency(rs!ACUMULADO)
+        ITEM.ListSubItems.Add , , UCase(Format(DateSerial(rs!ano, rs!mes, 1), "mmmm"))
+        ITEM.ListSubItems.Add , , FormatCurrency(rs!ENTRADA)
+        ITEM.ListSubItems.Add , , FormatCurrency(rs!SAIDA)
+        ITEM.ListSubItems.Add , , FormatCurrency(rs!SALDO)
+        ITEM.ListSubItems.Add , , rs!PEDIDOS
+        ITEM.ListSubItems.Add , , FormatCurrency(rs!TM)
+        ITEM.ListSubItems.Add , , FormatCurrency(rs!ACUMULADO)
 
         txtEntrada.Value = FormatCurrency(rs!ENTRADA)
         txtSaida.Value = FormatCurrency(rs!SAIDA)
         txtSaldo.Value = FormatCurrency(rs!SALDO)
         txtAcumulado.Value = FormatCurrency(rs!ACUMULADO)
         
-        item.Tag = rs!ano & "|" & rs!mes
+        ITEM.Tag = rs!ano & "|" & rs!mes
         
         rs.MoveNext
 
@@ -146,6 +208,19 @@ Private Sub CarregarFluxoCaixa()
 
     rs.Close
     Set rs = Nothing
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "FluxoCaixa - carregar lv fluxo"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 
@@ -190,9 +265,11 @@ End Function
 
 Sub PreencherLvPagar()
 
+On Error GoTo TratarErro
+
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     sql = "SELECT IDAPAGAR, VENCIMENTO, VALOR, STATUS " & _
           "FROM tab_contasapagar " & _
@@ -216,11 +293,11 @@ Sub PreencherLvPagar()
 
     Do While Not rs.EOF
 
-        Set item = lvPagar.ListItems.Add(, , Format(rs!VENCIMENTO, "dd/mm/yyyy"))
-        item.Tag = rs!IDAPAGAR
+        Set ITEM = lvPagar.ListItems.Add(, , Format(rs!VENCIMENTO, "dd/mm/yyyy"))
+        ITEM.Tag = rs!IDAPAGAR
 
-        item.ListSubItems.Add , , Format(NzDbl(rs!valor), "#,##0.00")
-        item.ListSubItems.Add , , Nz(rs!STATUS)
+        ITEM.ListSubItems.Add , , Format(NzDbl(rs!valor), "#,##0.00")
+        ITEM.ListSubItems.Add , , Nz(rs!STATUS)
 
         rs.MoveNext
 
@@ -229,13 +306,28 @@ Sub PreencherLvPagar()
     rs.Close
     Set rs = Nothing
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "FluxoCaixa - carregar lv pagar"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Sub PreencherLvReceber()
 
+On Error GoTo TratarErro
+
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     sql = "SELECT IDARECEBER, VENCIMENTO, VALOR, STATUS " & _
           "FROM tab_contasareceber " & _
@@ -259,11 +351,11 @@ Sub PreencherLvReceber()
 
     Do While Not rs.EOF
 
-        Set item = lvReceber.ListItems.Add(, , Format(rs!VENCIMENTO, "dd/mm/yyyy"))
-        item.Tag = rs!IDARECEBER
+        Set ITEM = lvReceber.ListItems.Add(, , Format(rs!VENCIMENTO, "dd/mm/yyyy"))
+        ITEM.Tag = rs!IDARECEBER
 
-        item.ListSubItems.Add , , Format(NzDbl(rs!valor), "#,##0.00")
-        item.ListSubItems.Add , , Nz(rs!STATUS)
+        ITEM.ListSubItems.Add , , Format(NzDbl(rs!valor), "#,##0.00")
+        ITEM.ListSubItems.Add , , Nz(rs!STATUS)
 
         rs.MoveNext
 
@@ -271,5 +363,18 @@ Sub PreencherLvReceber()
 
     rs.Close
     Set rs = Nothing
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "FluxoCaixa - Carregar lv receber"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub

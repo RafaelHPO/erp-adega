@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEntradas
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   15450
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmEntradas.frx":0000
    ShowModal       =   0   'False
    StartUpPosition =   1  'CenterOwner
 End
@@ -14,11 +14,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-'==========================================================
-'INICIALIZA√á√ÉO O FORM
-'==========================================================
-
 Private Sub btnCancelar_Click()
+
+On Error GoTo TratarErro
 
 If Not SolicitarSenhaCaixa() Then Exit Sub
 
@@ -41,7 +39,7 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
     Set rs = Conn.Execute(sql)
 
     If rs.EOF Then
-        MsgBox "Compra n√£o encontrada.", vbExclamation
+        MsgBox "Compra n„o encontrada.", vbExclamation
         Exit Sub
     End If
 
@@ -49,7 +47,7 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
     Set rs = Nothing
 
     '====================================================
-    ' chama procedure (SEM RESTRI√á√ÉO DE STATUS)
+    ' chama procedure (SEM RESTRI«√O DE STATUS)
     '====================================================
     Set cmd = New ADODB.Command
 
@@ -76,9 +74,24 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
     
     CarregarCompras
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmEntradas - btnCancelar"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub btnConferencia_Click()
+
+On Error GoTo TratarErro
 
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -100,7 +113,7 @@ Private Sub btnConferencia_Click()
     Set rs = Conn.Execute(sql)
 
     If rs.EOF Then
-        MsgBox "Compra n√£o encontrada.", vbExclamation
+        MsgBox "Compra n„o encontrada.", vbExclamation
         rs.Close
         Set rs = Nothing
         Exit Sub
@@ -112,23 +125,23 @@ Private Sub btnConferencia_Click()
     rs.Close
     Set rs = Nothing
 
-    If StatusCompra = "CONCLUIDO" Or StatusCompra = "CONCLU√çDO" Then
-        MsgBox "Esta compra j√° est√° conclu√≠da.", vbInformation
+    If StatusCompra = "CONCLUIDO" Or StatusCompra = "CONCLUÕDO" Then
+        MsgBox "Esta compra j· est· concluÌda.", vbInformation
         Exit Sub
     End If
 
     If StatusCompra = "CANCELADO" Then
-        MsgBox "Esta compra est√° cancelada.", vbExclamation
+        MsgBox "Esta compra est· cancelada.", vbExclamation
         Exit Sub
     End If
 
     If StatusCompra <> "ABERTO" Then
-        MsgBox "A confer√™ncia s√≥ pode ser aberta para compras com status ABERTO.", vbExclamation
+        MsgBox "A conferÍncia sÛ pode ser aberta para compras com status ABERTO.", vbExclamation
         Exit Sub
     End If
 
     If Not CompraPossuiItensPendentes(IdCompraSel, NumeroNF) Then
-        MsgBox "Todos os produtos desta compra j√° foram lan√ßados.", vbInformation
+        MsgBox "Todos os produtos desta compra j· foram lanÁados.", vbInformation
         Exit Sub
     End If
 
@@ -139,6 +152,19 @@ Private Sub btnConferencia_Click()
         .Show vbModal
     End With
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmEntradas - btnConferencia"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Function CompraPossuiItensPendentes(ByVal IdCompra As Long, ByVal NumeroNF As String) As Boolean
@@ -148,7 +174,7 @@ Private Function CompraPossuiItensPendentes(ByVal IdCompra As Long, ByVal Numero
     Dim i As Long
     Dim CodFornecedor As String
     Dim CodBarras As String
-    Dim IDProduto As Variant
+    Dim idproduto As Variant
 
     Set ws = ThisWorkbook.Worksheets("ENTRADA PRODUTOS")
     Set tb = ws.ListObjects("ENTRADA_PRODUTOS")
@@ -162,14 +188,14 @@ Private Function CompraPossuiItensPendentes(ByVal IdCompra As Long, ByVal Numero
             CodFornecedor = Nz(tb.DataBodyRange(i, tb.ListColumns("CODIGO FORNECEDOR").Index).Value)
             CodBarras = Nz(tb.DataBodyRange(i, tb.ListColumns("CODIGO BARRAS").Index).Value)
 
-            IDProduto = BuscarProdutoXML_Geral(CodBarras, CodFornecedor)
+            idproduto = BuscarProdutoXML_Geral(CodBarras, CodFornecedor)
 
-            If IsEmpty(IDProduto) Then
+            If IsEmpty(idproduto) Then
                 CompraPossuiItensPendentes = True
                 Exit Function
             End If
 
-            If Not ItemJaLancadoCompra(IdCompra, CLng(IDProduto)) Then
+            If Not ItemJaLancadoCompra(IdCompra, CLng(idproduto)) Then
                 CompraPossuiItensPendentes = True
                 Exit Function
             End If
@@ -181,6 +207,8 @@ Private Function CompraPossuiItensPendentes(ByVal IdCompra As Long, ByVal Numero
 End Function
 
 Public Function BuscarProdutoXML_Geral(ByVal CodigoBarras As String, ByVal CodigoFornecedor As String) As Variant
+
+On Error GoTo TratarErro
 
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -205,7 +233,7 @@ Public Function BuscarProdutoXML_Geral(ByVal CodigoBarras As String, ByVal Codig
     Set rs = Conn.Execute(sql)
 
     If Not rs.EOF Then
-        BuscarProdutoXML_Geral = CLng(rs!IDProduto)
+        BuscarProdutoXML_Geral = CLng(rs!idproduto)
     Else
         BuscarProdutoXML_Geral = Empty
     End If
@@ -213,9 +241,22 @@ Public Function BuscarProdutoXML_Geral(ByVal CodigoBarras As String, ByVal Codig
     rs.Close
     Set rs = Nothing
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmEntradas - Funcao buscarprodutoxml"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Function
 
-Public Function ItemJaLancadoCompra(ByVal IdCompra As Long, ByVal IDProduto As Long) As Boolean
+Public Function ItemJaLancadoCompra(ByVal IdCompra As Long, ByVal idproduto As Long) As Boolean
 
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -223,7 +264,7 @@ Public Function ItemJaLancadoCompra(ByVal IdCompra As Long, ByVal IDProduto As L
     sql = "SELECT COUNT(*) AS QTDE " & _
           "FROM tab_itenscompra " & _
           "WHERE IDCOMPRA = " & SqlNumero(IdCompra) & _
-          " AND IDPRODUTO = " & SqlNumero(IDProduto)
+          " AND IDPRODUTO = " & SqlNumero(idproduto)
 
     Set rs = Conn.Execute(sql)
 
@@ -240,7 +281,9 @@ Private Sub lvCompras_dblclick()
 
 End Sub
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
+
+On Error GoTo TratarErro
 
     With lvCompras
 
@@ -262,21 +305,33 @@ Private Sub UserForm_initialize()
 
     CarregarCompras
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmEntradas - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
     CarregarCompras
 
 End Sub
-'=========================================================
-'LIST VIEW COMPRAS
-'=========================================================
 
 Private Sub CarregarCompras()
 
+On Error GoTo TratarErro
+
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
     
 sql = "SELECT C.IDCOMPRA, F.NOME, " & _
       "C.NUMERONF, C.DATACOMPRA, C.VALORTOTAL, C.STATUS " & _
@@ -292,13 +347,13 @@ lvCompras.ListItems.Clear
     
     Do While Not rs.EOF
     
-        Set item = lvCompras.ListItems.Add(, , Nz(rs!IdCompra))
+        Set ITEM = lvCompras.ListItems.Add(, , Nz(rs!IdCompra))
         
-        item.SubItems(1) = Nz(rs!NOME)
-        item.SubItems(2) = Nz(rs!NumeroNF)
-        item.SubItems(3) = Format(Nz(rs!datacompra), "dd/mm/yyyy hh:mm")
-        item.SubItems(4) = Format(Nz(rs!ValorTotal, 0), "R$    #,##0.00")
-        item.SubItems(5) = Nz(rs!STATUS)
+        ITEM.SubItems(1) = Nz(rs!NOME)
+        ITEM.SubItems(2) = Nz(rs!NumeroNF)
+        ITEM.SubItems(3) = Format(Nz(rs!datacompra), "dd/mm/yyyy hh:mm")
+        ITEM.SubItems(4) = Format(Nz(rs!ValorTotal, 0), "R$    #,##0.00")
+        ITEM.SubItems(5) = Nz(rs!STATUS)
         
         rs.MoveNext
     Loop
@@ -306,18 +361,27 @@ lvCompras.ListItems.Clear
     rs.Close
 Set rs = Nothing
     
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmEntradas - carregar lv"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+    
 End Sub
-'=========================================================
-'BOTAO NOVA COMPRA
-'=========================================================
+
 Private Sub btnAbrirCompra_Click()
 
     frmCompra.Show vbModeless
 
 End Sub
-'=========================================================
-'BOTAO EDITAR COMPRA
-'=========================================================
+
 Private Sub btnEditarCompra_Click()
     
     If lvCompras.SelectedItem Is Nothing Then

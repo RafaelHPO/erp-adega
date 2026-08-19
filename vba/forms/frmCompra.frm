@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCompra
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   12150
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmCompra.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmCompra"
@@ -35,7 +35,7 @@ Private Sub btnImportar_Click()
     End If
 
 CarregarNotasXML
-    CarregarFornecedores
+    'CarregarFornecedores
 
 End Sub
 
@@ -59,7 +59,7 @@ End Function
 
 
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
 
     TipoEntrada = "MANUAL"
 
@@ -88,7 +88,7 @@ Private Sub UserForm_initialize()
 
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
     CarregarComboFornecedor cmbFornecedor
     CarregarNotasXML
@@ -100,7 +100,7 @@ Public Sub CarregarNotasXML()
     Dim ws As Worksheet
     Dim tb As ListObject
     Dim i As Long
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     Set ws = ThisWorkbook.Worksheets("ENTRADA CONSOLIDADO")
     Set tb = ws.ListObjects("ENTRADA_CONSOLIDADO")
@@ -113,16 +113,16 @@ Public Sub CarregarNotasXML()
 
         If UCase(Trim(tb.DataBodyRange(i, tb.ListColumns("STATUS").Index).Value)) <> "PROCESSADO" Then
 
-            Set item = lvNotas.ListItems.Add(, , _
+            Set ITEM = lvNotas.ListItems.Add(, , _
                 tb.DataBodyRange(i, tb.ListColumns("DATA").Index).Value)
 
-            item.SubItems(1) = tb.DataBodyRange(i, tb.ListColumns("CNPJ").Index).Value
-            item.SubItems(2) = tb.DataBodyRange(i, tb.ListColumns("FORNECEDOR").Index).Value
-            item.SubItems(3) = tb.DataBodyRange(i, tb.ListColumns("NUMERO NFE").Index).Value
-            item.SubItems(4) = tb.DataBodyRange(i, tb.ListColumns("VALOR TOTAL").Index).Value
+            ITEM.SubItems(1) = tb.DataBodyRange(i, tb.ListColumns("CNPJ").Index).Value
+            ITEM.SubItems(2) = tb.DataBodyRange(i, tb.ListColumns("FORNECEDOR").Index).Value
+            ITEM.SubItems(3) = tb.DataBodyRange(i, tb.ListColumns("NUMERO NFE").Index).Value
+            ITEM.SubItems(4) = tb.DataBodyRange(i, tb.ListColumns("VALOR TOTAL").Index).Value
 
             'Guarda a chave da NFe para uso posterior
-            item.Tag = tb.DataBodyRange(i, tb.ListColumns("CHAVE NFE").Index).Value
+            ITEM.Tag = tb.DataBodyRange(i, tb.ListColumns("CHAVE NFE").Index).Value
 
         End If
 
@@ -131,7 +131,7 @@ Public Sub CarregarNotasXML()
 End Sub
 Private Sub lvNotas_DblClick()
 
-    Dim item As ListItem
+    Dim ITEM As ListItem
     Dim i As Long
     Dim encontrou As Boolean
     Dim ws As Worksheet
@@ -139,7 +139,7 @@ Private Sub lvNotas_DblClick()
     
     If lvNotas.SelectedItem Is Nothing Then Exit Sub
     
-    Set item = lvNotas.SelectedItem
+    Set ITEM = lvNotas.SelectedItem
     
     Set ws = ThisWorkbook.Worksheets("ENTRADA CONSOLIDADO")
     Set tb = ws.ListObjects("ENTRADA_CONSOLIDADO")
@@ -149,12 +149,12 @@ Private Sub lvNotas_DblClick()
     ' DADOS DA NOTA XML
     '====================================
     
-    txtNf.Value = item.SubItems(3)
-    txtValorTotal.Value = item.SubItems(4)
+    txtNf.Value = ITEM.SubItems(3)
+    txtValorTotal.Value = ITEM.SubItems(4)
     
-    txtChaveNf.Value = item.Tag
+    txtChaveNf.Value = ITEM.Tag
     
-    NumeroNFE_XML = item.SubItems(3)
+    NumeroNFE_XML = ITEM.SubItems(3)
     TipoEntrada = "XML"
     
     
@@ -164,7 +164,7 @@ Private Sub lvNotas_DblClick()
     
     For i = 0 To cmbFornecedor.ListCount - 1
         
-        If cmbFornecedor.List(i, 1) = item.SubItems(2) Then
+        If cmbFornecedor.List(i, 1) = ITEM.SubItems(2) Then
             
             cmbFornecedor.ListIndex = i
             txtId.Value = cmbFornecedor.List(i, 0)
@@ -178,17 +178,17 @@ Private Sub lvNotas_DblClick()
     
     
     '====================================
-    ' FORNECEDOR N√ÉO ENCONTRADO
+    ' FORNECEDOR N√O ENCONTRADO
     '====================================
     
     If encontrou = False Then
         
-        If MsgBox("Fornecedor n√£o cadastrado." & vbCrLf & vbCrLf & _
+        If MsgBox("Fornecedor n„o cadastrado." & vbCrLf & vbCrLf & _
                   "Deseja cadastrar agora?", _
                   vbQuestion + vbYesNo, _
-                  "Fornecedor n√£o encontrado") = vbYes Then
+                  "Fornecedor n„o encontrado") = vbYes Then
             
-            Call AbrirCadastroFornecedorXML(item)
+            Call AbrirCadastroFornecedorXML(ITEM)
             
         Else
             
@@ -199,7 +199,7 @@ Private Sub lvNotas_DblClick()
     End If
 
 End Sub
-Private Sub AbrirCadastroFornecedorXML(ByVal item As ListItem)
+Private Sub AbrirCadastroFornecedorXML(ByVal ITEM As ListItem)
 
     Dim ws As Worksheet
     Dim tb As ListObject
@@ -211,7 +211,7 @@ Private Sub AbrirCadastroFornecedorXML(ByVal item As ListItem)
     
     For Each Linha In tb.ListRows
         
-        If Linha.Range(tb.ListColumns("CNPJ").Index).Value = item.SubItems(1) Then
+        If Linha.Range(tb.ListColumns("CNPJ").Index).Value = ITEM.SubItems(1) Then
             
             With frmCadFornecedor
                 
@@ -251,7 +251,7 @@ Private Sub cmbFornecedor_Change()
 End Sub
 Private Sub btnSalvar_Click()
 
-On Error GoTo Erro
+On Error GoTo erro
 
 Dim cmd As ADODB.Command
 Dim rs As ADODB.Recordset
@@ -289,7 +289,7 @@ Set rs = cmd.Execute
 
 If rs.EOF Then
 
-    MsgBox "N√£o foi poss√≠vel registrar a compra.", vbExclamation
+    MsgBox "N„o foi possÌvel registrar a compra.", vbExclamation
     GoTo Limpar
 
 End If
@@ -338,7 +338,7 @@ Set cmd = Nothing
 Exit Sub
 
 
-Erro:
+erro:
 
 MsgBox "Erro ao registrar compra:" & vbCrLf & Err.Description, vbCritical
 
@@ -349,7 +349,7 @@ End Sub
 Private Sub btnFechar_Click()
 
     '====================================================
-    ' FECHA O FORMUL√ÅRIO
+    ' FECHA O FORMUL¡RIO
     '====================================================
     Unload Me
 

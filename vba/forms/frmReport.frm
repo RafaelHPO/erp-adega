@@ -27,9 +27,9 @@ End Sub
 
 Private Sub btnEditar_Click()
 
-    Dim SQL As String
+    Dim sql As String
     
-        SQL = "UPDATE TAB_OCORRENCIAS SET " & _
+        sql = "UPDATE TAB_OCORRENCIAS SET " & _
              "DATA = " & SqlData(txtData) & ", " & _
              "OCORRENCIA = " & SqlTexto(txtOcorrencia) & ", " & _
              "TELA = " & SqlTexto(txtTela) & ", " & _
@@ -39,7 +39,7 @@ Private Sub btnEditar_Click()
              "VERSAO_SISTEMA = " & SqlTexto(VersaoSistema) & " " & _
              "WHERE IDREPORT = " & IDOcorrencia
       
-      Conn.Execute SQL
+      Conn.Execute sql
       
     MsgBox "Ocorrência atualizada!", vbInformation
     
@@ -49,9 +49,9 @@ End Sub
 
 Private Sub btnSalvar_Click()
         
-    Dim SQL As String
+    Dim sql As String
     
-    SQL = " INSERT INTO TAB_OCORRENCIAS(DATA, OCORRENCIA, TELA, DESCRICAO, STATUS, IDUSUARIO, VERSAO_SISTEMA) " & _
+    sql = " INSERT INTO TAB_OCORRENCIAS(DATA, OCORRENCIA, TELA, DESCRICAO, STATUS, IDUSUARIO, VERSAO_SISTEMA) " & _
           " VALUES(" & SqlData(txtData) & ", " & _
                      SqlTexto(txtOcorrencia) & "," & _
                      SqlTexto(txtTela) & "," & _
@@ -60,7 +60,7 @@ Private Sub btnSalvar_Click()
                      SqlNumero(IDUsuarioLogado) & "," & _
                      SqlTexto(VersaoSistema) & ")"
 
-    Conn.Execute SQL
+    Conn.Execute sql
     
     MsgBox "Ocorrência Registrada com Sucesso!", vbInformation, "Sucesso"
     
@@ -179,12 +179,12 @@ End Sub
 Private Sub CarregarReport()
 
     Dim rs As ADODB.Recordset
-    Dim SQL As String
+    Dim sql As String
     
-    SQL = " SELECT TELA, OCORRENCIA, DESCRICAO, STATUS, DATA, RESPOSTA " & _
+    sql = " SELECT TELA, OCORRENCIA, DESCRICAO, STATUS, DATA, RESPOSTA " & _
           " FROM TAB_OCORRENCIAS WHERE IDREPORT = " & IDOcorrencia
     
-    Set rs = Conn.Execute(SQL)
+    Set rs = Conn.Execute(sql)
     
         If Not rs.EOF Then
         

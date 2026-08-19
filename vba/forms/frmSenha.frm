@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmSenha
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   4320
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmSenha.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmSenha"
@@ -22,13 +22,10 @@ Private Sub btnConfirmar_Click()
         SenhaValida = True
     Else
         SenhaValida = False
-        MsgBox "Senha inv√°lida", vbExclamation
+        MsgBox "Senha inv·lida", vbExclamation
     End If
 
     Me.Hide
 
 End Sub
 
-Private Sub UserForm_Click()
-
-End Sub

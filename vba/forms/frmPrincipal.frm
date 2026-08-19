@@ -1,11 +1,11 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmPrincipal 
-   Caption         =   "ERP Comercial"
+   Caption         =   "ERP Adega"
    ClientHeight    =   12015
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   20955
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmPrincipal.frx":0000
    StartUpPosition =   2  'CenterScreen
 End
 Attribute VB_Name = "frmPrincipal"
@@ -34,7 +34,7 @@ Public Sub ExecutarBackup(Optional ByVal ExibirMensagem As Boolean = False)
     Set Shell = Nothing
 
     If ExibirMensagem Then
-        MsgBox "Backup conclu√≠do com sucesso!", vbInformation
+        MsgBox "Backup concluÌdo com sucesso!", vbInformation
     End If
 
 End Sub
@@ -100,7 +100,7 @@ fraEstoque.Visible = False
     caminho = "C:\Sistema\DASHBOARD.xlsm"
 
     If Dir(caminho) = "" Then
-        MsgBox "Dashboard n√£o encontrado em:" & vbCrLf & caminho, vbExclamation
+        MsgBox "Dashboard n„o encontrado em:" & vbCrLf & caminho, vbExclamation
         Exit Sub
     End If
 
@@ -158,6 +158,12 @@ fraEstoque.Visible = False
 
 End Sub
 
+Private Sub btnReport_Click()
+
+    frmOcorrencias.Show vbModeless
+    
+End Sub
+
 Private Sub imgGear_Click()
 
     fraConfig.Visible = Not fraConfig.Visible
@@ -196,23 +202,30 @@ ExecutarBackup False
 
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
     CarregarKpiPrincipal
+    
+    txtAtt.Value = " ---------Vers„o: 1.2.0--------- " & vbCrLf & _
+                   " ADICIONADO BOTAO EDITAR EM PEDIDO DE VENDA, AJUSTE NA BORDA DAS TELAS, OTIMIZA«√O NA TELA DE VENDAS E LEGENDA DE AVISO. " & vbCrLf & vbCrLf & _
+                   " ---------Vers„o: 1.1.0--------- " & vbCrLf & _
+                   " FRMPRODUTOS INICIANDO EM BRANCO, CORRIGIDO. LOG DE DEPURA«√O DE ERROS NO BANCO, IMPLANTADO CALCULO DE ESTOQUE MÕNIMO. " & vbCrLf & vbCrLf & _
+                   " ---------Vers„o: 1.0.4--------- " & vbCrLf & _
+                   " FORMATA«√O DE DATA E VALORES EM TEXTBOX E LISTVIEW, BTNEDITAR EM CONTAS "
 
 End Sub
 
-Public Sub UserForm_initialize()
+Public Sub UserForm_Initialize()
 
 ExecutarBackup False
 AgendarBackups
 
-  lblVersao.Caption = "Vers√£o " & BuscarConfig("VERSAO_SISTEMA")
+  lblVersao.Caption = "Vers„o " & BuscarConfig("VERSAO_SISTEMA")
 
     lblAtualizacao.Caption = _
         "Atualizado em " & BuscarConfig("DATA_VERSAO")
 
-    ' s√≥ UI aqui
+    ' sÛ UI aqui
     fraEstoque.Visible = False
     fraOperacao.Visible = False
     fraCadastro.Visible = False
@@ -337,7 +350,7 @@ txtProxVenc.Value = _
     proxVenc & vbCrLf & vbCrLf & _
     forn & vbCrLf & vbCrLf & _
     "VALOR: " & Format(valorprox, "R$ #,##0.00") & vbCrLf & vbCrLf & _
-    "DESCRI√á√ÉO: " & desc
+    "DESCRI«√O: " & desc
     txtTitulos.Value = titulos
     txtTotalTitulos.Value = Format(totaltitulos, "R$ #,##0.00")
     
@@ -364,7 +377,7 @@ End Sub
 
 
 '=====================================================
-' MENU OPERA√á√ïES
+' MENU OPERA«’ES
 '=====================================================
 
 Private Sub btnOperacao_Click()
@@ -384,7 +397,7 @@ End Sub
 Private Sub btnCadProduto_Click()
 fraEstoque.Visible = False
    fraCadastro.Visible = False
-    ' Abre o formul√°rio de cadastro de produtos
+    ' Abre o formul·rio de cadastro de produtos
     frmProdutos.Show vbModeless
   
 End Sub
@@ -397,20 +410,20 @@ End Sub
 Private Sub btnCadFornecedor_Click()
 fraEstoque.Visible = False
     fraCadastro.Visible = False
-    ' Abre o formul√°rio de fornecedores
+    ' Abre o formul·rio de fornecedores
     frmFornecedores.Show vbModeless
  
 End Sub
 
 
 '=====================================================
-' CADASTRO DE USU√ÅRIOS
+' CADASTRO DE USU¡RIOS
 '=====================================================
 
 Private Sub btnCadUsuario_Click()
 fraEstoque.Visible = False
   fraCadastro.Visible = False
-    ' Abre o formul√°rio de usu√°rios
+    ' Abre o formul·rio de usu·rios
     frmUsuarios.Show vbModeless
   
 End Sub
@@ -462,7 +475,7 @@ Private Sub btnAbrirCaixa_Click()
 If Not ConfirmarSenha Then Exit Sub
 
     '====================================================
-    ' DECLARA√á√ÉO DAS VARI√ÅVEIS
+    ' DECLARA«√O DAS VARI¡VEIS
     '====================================================
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -479,7 +492,7 @@ If Not ConfirmarSenha Then Exit Sub
 
     If Not IsNumeric(Retorno) Then
 
-        MsgBox "Informe um valor num√©rico v√°lido.", vbExclamation
+        MsgBox "Informe um valor numÈrico v·lido.", vbExclamation
         Exit Sub
 
     End If
@@ -509,7 +522,7 @@ If Not ConfirmarSenha Then Exit Sub
             txtStatusCaixa.Value = "ABERTO"
             txtIdCaixa.Value = rs("ID CAIXA")
 
-            MsgBox "Caixa N¬∫ " & rs("ID CAIXA") & _
+            MsgBox "Caixa N∫ " & rs("ID CAIXA") & _
                    " aberto com fundo de R$ " & _
                    Format(rs("FUNDO"), "0.00"), vbInformation
 
@@ -527,7 +540,7 @@ Private Sub btnSangria_Click()
 If Not ConfirmarSenha Then Exit Sub
 
     '====================================================
-    ' DECLARA√á√ÉO DAS VARI√ÅVEIS
+    ' DECLARA«√O DAS VARI¡VEIS
     '====================================================
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -558,7 +571,7 @@ If Not ConfirmarSenha Then Exit Sub
 
     If Not IsNumeric(RetornoValor) Then
 
-        MsgBox "Informe um valor num√©rico v√°lido.", vbExclamation
+        MsgBox "Informe um valor numÈrico v·lido.", vbExclamation
         Exit Sub
 
     End If
@@ -601,7 +614,7 @@ Private Sub btnFecharCaixa_Click()
 If Not ConfirmarSenha Then Exit Sub
 
     '====================================================
-    ' DECLARA√á√ÉO DAS VARI√ÅVEIS
+    ' DECLARA«√O DAS VARI¡VEIS
     '====================================================
     Dim rs As ADODB.Recordset
     Dim sql As String

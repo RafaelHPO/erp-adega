@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmPagamento
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   5325
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmPagamento.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmPagamento"
@@ -54,13 +54,15 @@ FormatarMoeda txtVr
 
 End Sub
 
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
     AtualizarFinanceiro
 
 End Sub
 
-Private Sub UserForm_initialize()
+Private Sub UserForm_Initialize()
+
+On Error GoTo TratarErro
 
     txtDinheiro.Visible = False
     txtPix.Visible = False
@@ -79,6 +81,19 @@ Private Sub UserForm_initialize()
     txtVr.Visible = False
 txtVr.Value = ""
 ckVR.Value = False
+    
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "Pagamento - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
     
 End Sub
 Private Function GetPendenteVR() As Double
@@ -214,6 +229,8 @@ Public Sub AtualizarFinanceiro()
 
 End Sub
 Private Sub btnPagar_Click()
+
+On Error GoTo TratarErro
 
     Dim recebido As Double
     Dim pago As Double
@@ -392,7 +409,7 @@ Private Sub btnPagar_Click()
 
     If pendente <= 0 Then
 
-        MsgBox "Pagamento concluÃ­do!"
+        MsgBox "Pagamento concluído!"
         Unload Me
 
     Else
@@ -400,5 +417,18 @@ Private Sub btnPagar_Click()
         MsgBox "Ainda falta: R$ " & Format(pendente, "0.00")
 
     End If
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "Pagamento - btnPagar"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub

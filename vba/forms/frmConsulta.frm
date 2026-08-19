@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmConsulta
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   7020
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmConsulta.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmConsulta"
@@ -13,7 +13,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Sub Userform_activate()
+Private Sub userform_activate()
 
     CarregarProdutosCombo cmbProduto
 
@@ -31,15 +31,15 @@ Private Sub cmbProduto_change()
 
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim IDProduto As Long
+    Dim idproduto As Long
 
     If cmbProduto.ListIndex = -1 Then Exit Sub
 
-    IDProduto = CLng(cmbProduto.List(cmbProduto.ListIndex, 0))
+    idproduto = CLng(cmbProduto.List(cmbProduto.ListIndex, 0))
 
     sql = "SELECT PRECOVENDA, ESTOQUEATUAL, TIPO " & _
           "FROM TAB_PRODUTOS " & _
-          "WHERE IDPRODUTO = " & IDProduto
+          "WHERE IDPRODUTO = " & idproduto
 
     Set rs = Conn.Execute(sql)
 
