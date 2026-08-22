@@ -13,9 +13,15 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
-
 Public idvenda As Long
+
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarTemaLv lvPagamentos
+    AplicarBotaoPrincipal btnEstornar
+    
+End Sub
 
 Private Sub userform_activate()
 
@@ -28,7 +34,7 @@ Private Sub userform_activate()
 
 End Sub
 
-Private Sub UserForm_Initialize()
+Private Sub UserForm_initialize()
 
  With lvPagamentos
 
@@ -46,6 +52,8 @@ Private Sub UserForm_Initialize()
         .ColumnHeaders.Add , , "DATA", 110
 
     End With
+
+AplicarPaleta
 
 End Sub
 

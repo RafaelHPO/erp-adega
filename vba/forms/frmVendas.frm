@@ -1,6 +1,6 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmVendas 
-   Caption         =   "Registro de Vendas"
+   Caption         =   "REGISTRO DE VENDAS"
    ClientHeight    =   11610
    ClientLeft      =   120
    ClientTop       =   465
@@ -19,6 +19,176 @@ Private FiltroDataFim As Date
 Private FiltroStatus As String
 Private FiltroUsuario As Long
 Private UsarFiltroUsuario As Boolean
+Private carregando As Boolean
+
+'====================================================
+' REDIMENSIONAMENTO DO FORMULÁRIO
+'====================================================
+Private formW As Single
+Private formH As Single
+Private redimensionando As Boolean
+Private telaAjustada As Boolean
+
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarTemaLv lvVendas
+    AplicarBotaoPrincipal btnAbrirVenda
+    AplicarBotaoPrincipal btnCaixa
+    AplicarBotaoPrincipal btnCancelarVenda
+    
+    
+End Sub
+
+Private Sub UserForm_Resize()
+
+    On Error Resume Next
+
+    If redimensionando Then Exit Sub
+    If formW = 0 Or formH = 0 Then Exit Sub
+
+    redimensionando = True
+
+    Dim scaleX As Double
+    Dim scaleY As Double
+    Dim ctrl As Control
+    Dim valores As Variant
+
+    scaleX = Me.Width / formW
+    scaleY = Me.Height / formH
+
+    For Each ctrl In Me.Controls
+
+        If Len(ctrl.Tag) > 0 Then
+
+            valores = Split(ctrl.Tag, ";")
+
+            ctrl.Left = CDbl(valores(0)) * scaleX
+            ctrl.Top = CDbl(valores(1)) * scaleY
+            ctrl.Width = CDbl(valores(2)) * scaleX
+            ctrl.Height = CDbl(valores(3)) * scaleY
+
+        End If
+
+    Next ctrl
+
+    redimensionando = False
+
+End Sub
+
+Private Sub userform_activate()
+
+On Error GoTo TratarErro
+
+    If Not telaAjustada Then
+
+        telaAjustada = True
+
+        Me.Left = 0
+        Me.Top = 0
+        Me.Width = Application.Width
+        Me.Height = Application.Height
+
+    End If
+
+carregando = True
+
+fraCaixa.Visible = False
+
+'CarregarVendas esta sendo chamada por eventos de filtro nao precisa chamar aqui
+    'Call CarregarVendas
+    ValidarCaixaOperacional
+    
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmVendas - activate"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+    
+End Sub
+
+Private Sub UserForm_initialize()
+
+On Error GoTo TratarErro
+
+    '====================================================
+    ' SALVA O TAMANHO ORIGINAL DO FORMULÁRIO E CONTROLES
+    '====================================================
+    formW = Me.Width
+    formH = Me.Height
+
+    Dim ctrl As Control
+
+    For Each ctrl In Me.Controls
+        ctrl.Tag = ctrl.Left & ";" & _
+                   ctrl.Top & ";" & _
+                   ctrl.Width & ";" & _
+                   ctrl.Height
+    Next ctrl
+
+    With lvVendas
+
+        .View = lvwReport
+        .FullRowSelect = True
+        .Gridlines = False
+        .HideSelection = False
+
+        .ColumnHeaders.Clear
+
+        .ColumnHeaders.Add , , "ID", 50
+        .ColumnHeaders.Add , , "DATA", 80
+        .ColumnHeaders.Add , , "HORA", 60
+        .ColumnHeaders.Add , , "REFERENCIA", 300
+        .ColumnHeaders.Add , , "VALOR TOTAL", 100
+        .ColumnHeaders.Add , , "DESCONTO", 100
+        .ColumnHeaders.Add , , "VALOR FINAL", 100
+        .ColumnHeaders.Add , , "USUARIO", 100
+        .ColumnHeaders.Add , , "STATUS", 100
+        .ColumnHeaders.Add , , "DIAS PENDENTE", 140
+
+    End With
+
+  CarregarCmbData
+    CarregarCmbUsuario
+    CarregarCmbStatus
+    
+btnExibir.Visible = True
+btnOcultar.Visible = False
+lblAvisoCaixa.Visible = False
+
+txtQtdAberto.PasswordChar = "*"
+txtAberto.PasswordChar = "*"
+txtQtdeVendas.PasswordChar = "*"
+txtVendido.PasswordChar = "*"
+txtTm.PasswordChar = "*"
+txtCaixa.PasswordChar = "*"
+
+AplicarPaleta
+
+txtAberto.ForeColor = vbRed
+txtQtdAberto.ForeColor = vbRed
+    
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmVendas - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
+End Sub
 
 Private Sub btnAbrirCaixa_Click()
 
@@ -304,87 +474,6 @@ Private Sub btnEditarVenda_Click()
 End Sub
 
 
-Private Sub userform_activate()
-
-On Error GoTo TratarErro
-
-fraCaixa.Visible = False
-
-    Call CarregarVendas
-    ValidarCaixaOperacional
-    
-        Exit Sub
-
-TratarErro:
-
-    modSistema.tela = "frmVendas - activate"
-    modSistema.DescErro = Err.Description
-    modSistema.nErro = Err.Number
-
-    Call modSistema.ReportarErro
-    
-    MsgBox "Erro: " & Err.Number & vbCrLf & _
-                        Err.Description, vbInformation, "SISTEMA"
-    
-End Sub
-
-
-Private Sub UserForm_Initialize()
-
-On Error GoTo TratarErro
-
-    With lvVendas
-
-        .View = lvwReport
-        .FullRowSelect = True
-        .Gridlines = True
-        .HideSelection = False
-
-        .ColumnHeaders.Clear
-
-        .ColumnHeaders.Add , , "ID", 50
-        .ColumnHeaders.Add , , "DATA", 100
-        .ColumnHeaders.Add , , "REFERENCIA", 140
-        .ColumnHeaders.Add , , "VALOR TOTAL", 110
-        .ColumnHeaders.Add , , "DESCONTO", 110
-        .ColumnHeaders.Add , , "VALOR FINAL", 110
-        .ColumnHeaders.Add , , "STATUS", 90
-        .ColumnHeaders.Add , , "USUÁRIO", 120
-        .ColumnHeaders.Add , , "DIAS PENDENTE", 110
-
-    End With
-
-  CarregarCmbData
-    CarregarCmbUsuario
-    CarregarCmbStatus
-
-    CarregarVendas
-
-btnExibir.Visible = True
-btnOcultar.Visible = False
-lblAvisoCaixa.Visible = False
-
-txtQtdAberto.PasswordChar = "*"
-txtAberto.PasswordChar = "*"
-txtQtdeVendas.PasswordChar = "*"
-txtVendido.PasswordChar = "*"
-txtTm.PasswordChar = "*"
-txtCaixa.PasswordChar = "*"
-
-    Exit Sub
-
-TratarErro:
-
-    modSistema.tela = "frmVendas - initialize"
-    modSistema.DescErro = Err.Description
-    modSistema.nErro = Err.Number
-
-    Call modSistema.ReportarErro
-    
-    MsgBox "Erro: " & Err.Number & vbCrLf & _
-                        Err.Description, vbInformation, "SISTEMA"
-
-End Sub
 Public Sub CarregarVendas()
 
 On Error GoTo TratarErro
@@ -395,6 +484,7 @@ On Error GoTo TratarErro
    sql = "SELECT " & _
       "V.IDVENDA, " & _
       "V.DATAVENDA, " & _
+      "V.HORAVENDA, " & _
       "UPPER(V.REFERENCIA) AS REFERENCIA, " & _
       "IFNULL(SUM(IV.SUBTOTAL),0) AS SUBTOTAL, " & _
       "V.VALORTOTAL, " & _
@@ -493,6 +583,7 @@ End If
           " GROUP BY " & _
           "V.IDVENDA, " & _
           "V.DATAVENDA, " & _
+          "V.HORAVENDA, " & _
           "V.REFERENCIA, " & _
           "V.VALORTOTAL, " & _
           "V.DESCONTO, " & _
@@ -506,7 +597,7 @@ End If
     sql = sql & _
           " ORDER BY " & _
           "CASE WHEN V.STATUS = 'ABERTO' THEN 0 ELSE 1 END, " & _
-          "V.IDVENDA DESC"
+          "V.IDVENDA DESC, V.HORAVENDA DESC"
 
 Set rs = Conn.Execute(sql)
 
@@ -517,22 +608,23 @@ Set rs = Conn.Execute(sql)
         With lvVendas.ListItems.Add(, , Nz(rs!idvenda))
 
     .SubItems(1) = Format(rs!DATAVENDA, "dd/mm/yyyy")
-    .SubItems(2) = Nz(rs!REFERENCIA)
-    .SubItems(3) = Format(Nz(rs!subtotal, 0), "R$       #,##0.00")
-    .SubItems(4) = Format(Nz(rs!Desconto, 0), "R$       #,##0.00")
-    .SubItems(5) = Format(Nz(rs!VALORFINAL, 0), "R$       #,##0.00")
-    .SubItems(6) = Nz(rs!STATUS)
+    .SubItems(2) = Format(rs!HORAVENDA, "hh:mm")
+    .SubItems(3) = Nz(rs!REFERENCIA)
+    .SubItems(4) = Format(Nz(rs!subtotal, 0), "R$          #,##0.00")
+    .SubItems(5) = Format(Nz(rs!Desconto, 0), "R$          #,##0.00")
+    .SubItems(6) = Format(Nz(rs!VALORFINAL, 0), "R$          #,##0.00")
+    .SubItems(8) = Nz(rs!status)
     .SubItems(7) = Nz(rs!Usuario)
-    .SubItems(8) = IIf(IsNull(rs!DIASPENDENTE), "-", _
+    .SubItems(9) = IIf(IsNull(rs!DIASPENDENTE), "-", _
                         rs!DIASPENDENTE & " Dias Pendente")
 
     If Nz(rs!DIASPENDENTE, 0) >= 7 Then
 
-        .ListSubItems(8).ForeColor = vbRed
+        .ListSubItems(9).ForeColor = vbRed
 
     ElseIf Nz(rs!DIASPENDENTE, 0) >= 3 Then
 
-        .ListSubItems(8).ForeColor = RGB(255, 140, 0)
+        .ListSubItems(9).ForeColor = RGB(255, 140, 0)
 
     End If
 
@@ -564,6 +656,8 @@ End Sub
 Private Sub btnCancelarVenda_Click()
 
 On Error GoTo TratarErro
+
+frmSenha.supervisor = True
 
 If Not SolicitarSenhaCaixa() Then Exit Sub
 
@@ -738,7 +832,7 @@ Public Sub ResumoOperacional()
     Set rs = Conn.Execute(sql)
 
     If Not rs.EOF Then
-        txtCaixa.Value = Format(Nz(rs!CAIXA, 0), "0.00")
+        txtCaixa.Value = Format(Nz(rs!caixa, 0), "0.00")
     Else
         txtCaixa.Value = "0.00"
     End If
@@ -932,6 +1026,9 @@ Private Sub CarregarCmbStatus()
 End Sub
 
 Private Sub cmbDataInicial_change()
+
+If carregando Then Exit Sub
+
 FormatarDatacmb cmbDataInicial
     ValidarPeriodo
     CarregarVendas
@@ -941,6 +1038,8 @@ End Sub
 
 Private Sub cmbDataFinal_change()
 
+If carregando Then Exit Sub
+
 FormatarDatacmb cmbDataFinal
     ValidarPeriodo
     CarregarVendas
@@ -948,11 +1047,17 @@ FormatarDatacmb cmbDataFinal
 End Sub
 
 Private Sub cmbUsuario_change()
+
+If carregando Then Exit Sub
+
     CarregarVendas
     
 End Sub
 
 Private Sub cmbStatus_change()
+
+If carregando Then Exit Sub
+
     CarregarVendas
 
 End Sub

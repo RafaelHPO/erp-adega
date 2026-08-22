@@ -15,7 +15,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Private IDGrupoAtual As Long
 
-Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+Private Sub UserForm_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
 
     If KeyCode = vbKeyEscape Then
         Unload Me
@@ -23,7 +23,7 @@ Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift
 
 End Sub
 
-Private Sub UserForm_Initialize()
+Private Sub UserForm_initialize()
 
     CarregarProdutosCombo cmbProduto, True
 

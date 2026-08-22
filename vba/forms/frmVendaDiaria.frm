@@ -18,7 +18,14 @@ Option Explicit
 Public ano As Long
 Public mes As Long
 
-Private Sub UserForm_Initialize()
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarTemaLv lvVendaDiaria
+
+End Sub
+
+Private Sub UserForm_initialize()
 
     With lvVendaDiaria
     
@@ -37,6 +44,8 @@ Private Sub UserForm_Initialize()
     .ColumnHeaders.Add , , "MARGEM BRUTA", 120
     
     End With
+
+AplicarPaleta
 
 End Sub
 

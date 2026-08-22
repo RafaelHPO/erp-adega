@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmItensCompra 
    Caption         =   "ENTRADA DE PRODUTOS"
-   ClientHeight    =   8415.001
+   ClientHeight    =   9600.001
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   14445
+   ClientWidth     =   15405
    OleObjectBlob   =   "frmItensCompra.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -16,19 +16,18 @@ Attribute VB_Exposed = False
 Public TipoEntrada As String
 Public NumeroNFE_XML As String
 
-Private Sub txtCusto_Change()
+Private Sub AplicarPaleta()
 
-FormatarMoeda txtCusto
-
+    AplicarTema Me
+    AplicarTemaLv lvProdutos
+    AplicarBotaoPrincipal btnAdcItem
+    AplicarBotaoPrincipal btnExcluirItem
+    AplicarBotaoPrincipal btnCancelar
+    AplicarBotaoPrincipal btnFecharEntrada
+    
 End Sub
 
-Private Sub txtVencimento_Change()
-
-    FormatarData txtVencimento
-
-End Sub
-
-Private Sub UserForm_Initialize()
+Private Sub UserForm_initialize()
 
 On Error GoTo TratarErro
 
@@ -42,18 +41,19 @@ On Error GoTo TratarErro
         .ColumnHeaders.Clear
 
         .ColumnHeaders.Add , , "ID", 40
-        .ColumnHeaders.Add , , "PRODUTO", 160
+        .ColumnHeaders.Add , , "PRODUTO", 200
         .ColumnHeaders.Add , , "U.M.", 50
         .ColumnHeaders.Add , , "QTDE", 50
         .ColumnHeaders.Add , , "CUSTO", 50
         .ColumnHeaders.Add , , "SUBTOTAL", 80
-        .ColumnHeaders.Add , , "LUCRO ESTIMADO", 100
+        .ColumnHeaders.Add , , "LUCRO", 60
         .ColumnHeaders.Add , , "STATUS", 100
 
     End With
 
     CarregarProdutosCombo cmbProduto
     CalcularSubtotal
+    AplicarPaleta
     
         Exit Sub
 
@@ -110,6 +110,19 @@ TratarErro:
     
     MsgBox "Erro: " & Err.Number & vbCrLf & _
                         Err.Description, vbInformation, "SISTEMA"
+
+End Sub
+
+
+Private Sub txtCusto_Change()
+
+FormatarMoeda txtCusto
+
+End Sub
+
+Private Sub txtVencimento_Change()
+
+    FormatarData txtVencimento
 
 End Sub
 

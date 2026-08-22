@@ -1,11 +1,11 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCaixa 
-   Caption         =   "HIST√ìRICO DE CAIXA"
+   Caption         =   "HIST”RICO DE CAIXA"
    ClientHeight    =   8415.001
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   13755
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmCaixa.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmCaixa"
@@ -13,15 +13,56 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Sub lvCaixa_BeforeLabelEdit(Cancel As Integer)
+Option Explicit
 
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarBotaoPrincipal btnAbrirCaixa
+    AplicarBotaoPrincipal btnSangria
+    AplicarBotaoPrincipal btnFecharCaixa
+    AplicarTemaLv lvCaixa
+    
 End Sub
 
-Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+Private Sub UserForm_initialize()
 
-    If KeyCode = vbKeyEscape Then
-        Unload Me
-    End If
+    AplicarPaleta
+
+End Sub
+Private Sub userform_activate()
+
+    '====================================================
+    ' CONFIGURA«√O DO LISTVIEW
+    '====================================================
+    With lvCaixa
+
+        .View = lvwReport
+        .FullRowSelect = True
+        .Gridlines = False
+        .HideColumnHeaders = False
+
+        .ListItems.Clear
+        .ColumnHeaders.Clear
+
+        '================================================
+        ' CABE«ALHOS
+        '================================================
+        .ColumnHeaders.Add , , "ID", 40
+        .ColumnHeaders.Add , , "DATA ABERTURA", 70
+        .ColumnHeaders.Add , , "USU¡RIO", 110
+        .ColumnHeaders.Add , , "FUNDO", 70
+        .ColumnHeaders.Add , , "SANGRIA", 70
+        .ColumnHeaders.Add , , "VALOR CAIXA", 80
+        .ColumnHeaders.Add , , "ESPERADO", 70
+        .ColumnHeaders.Add , , "STATUS", 70
+
+    End With
+
+    '====================================================
+    ' CARREGA DADOS
+    '====================================================
+    CarregarHistoricoCaixa
 
 End Sub
 
@@ -30,17 +71,17 @@ Private Sub btnAbrirCaixa_Click()
  If Not SolicitarSenhaCaixa() Then Exit Sub
 
     '====================================================
-    ' VALIDA SE J√Å EXISTE CAIXA ABERTO
+    ' VALIDA SE J¡ EXISTE CAIXA ABERTO
     '====================================================
     If ExisteCaixaAberto Then
 
-        MsgBox "J√° existe um caixa aberto.", vbExclamation
+        MsgBox "J· existe um caixa aberto.", vbExclamation
         Exit Sub
 
     End If
 
     '====================================================
-    ' DECLARA√á√ÉO DAS VARI√ÅVEIS
+    ' DECLARA«√O DAS VARI¡VEIS
     '====================================================
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -57,7 +98,7 @@ Private Sub btnAbrirCaixa_Click()
 
     If Not IsNumeric(Retorno) Then
 
-        MsgBox "Informe um valor num√©rico v√°lido.", vbExclamation
+        MsgBox "Informe um valor numÈrico v·lido.", vbExclamation
         Exit Sub
 
     End If
@@ -66,7 +107,7 @@ Private Sub btnAbrirCaixa_Click()
 
     If Fundo < 0 Then
 
-        MsgBox "O fundo inicial n√£o pode ser negativo.", vbExclamation
+        MsgBox "O fundo inicial n„o pode ser negativo.", vbExclamation
         Exit Sub
 
     End If
@@ -91,7 +132,7 @@ Private Sub btnAbrirCaixa_Click()
             frmPrincipal.txtStatusCaixa.Value = "ABERTO"
             frmPrincipal.txtIdCaixa.Value = rs("IDCAIXA")
 
-            MsgBox "Caixa N¬∫ " & rs("ID CAIXA") & _
+            MsgBox "Caixa N∫ " & rs("ID CAIXA") & _
                    " aberto com fundo de R$ " & _
                    Format(rs("FUNDO"), "0.00"), _
                    vbInformation
@@ -134,7 +175,7 @@ Private Sub btnSangria_Click()
 
     If Not IsNumeric(RetornoValor) Then
 
-        MsgBox "Informe um valor num√©rico v√°lido.", vbExclamation
+        MsgBox "Informe um valor numÈrico v·lido.", vbExclamation
         Exit Sub
 
     End If
@@ -176,7 +217,7 @@ If Not SolicitarSenhaCaixa() Then Exit Sub
     If Not MostrarResumoCaixa("fechar o caixa") Then Exit Sub
 
     '====================================================
-    ' DECLARA√á√ÉO DAS VARI√ÅVEIS
+    ' DECLARA«√O DAS VARI¡VEIS
     '====================================================
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -234,7 +275,7 @@ Private Sub CarregarHistoricoCaixa()
 
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     lvCaixa.ListItems.Clear
 
@@ -256,16 +297,16 @@ Private Sub CarregarHistoricoCaixa()
 
     Do While Not rs.EOF
 
-        Set item = lvCaixa.ListItems.Add(, , rs("IDCAIXA"))
+        Set ITEM = lvCaixa.ListItems.Add(, , rs("IDCAIXA"))
 
-        item.SubItems(1) = Format(rs("DATAABERTURA"), "dd/mm/yyyy")
-        item.SubItems(2) = rs("USUARIO")
+        ITEM.SubItems(1) = Format(rs("DATAABERTURA"), "dd/mm/yyyy")
+        ITEM.SubItems(2) = rs("USUARIO")
 
-        item.SubItems(3) = Format(rs("FUNDO"), "0.00")
-        item.SubItems(4) = Format(rs("SANGRIA"), "0.00")
-        item.SubItems(5) = Format(rs("VALORCAIXA"), "0.00")
-        item.SubItems(6) = Format(rs("DINHEIROESPERADO"), "0.00")
-        item.SubItems(7) = rs("STATUS")
+        ITEM.SubItems(3) = Format(rs("FUNDO"), "0.00")
+        ITEM.SubItems(4) = Format(rs("SANGRIA"), "0.00")
+        ITEM.SubItems(5) = Format(rs("VALORCAIXA"), "0.00")
+        ITEM.SubItems(6) = Format(rs("DINHEIROESPERADO"), "0.00")
+        ITEM.SubItems(7) = rs("STATUS")
 
         rs.MoveNext
 
@@ -273,40 +314,5 @@ Private Sub CarregarHistoricoCaixa()
 
     rs.Close
     Set rs = Nothing
-
-End Sub
-Private Sub Userform_activate()
-
-    '====================================================
-    ' CONFIGURA√á√ÉO DO LISTVIEW
-    '====================================================
-    With lvCaixa
-
-        .View = lvwReport
-        .FullRowSelect = True
-        .Gridlines = True
-        .HideColumnHeaders = False
-
-        .ListItems.Clear
-        .ColumnHeaders.Clear
-
-        '================================================
-        ' CABE√áALHOS
-        '================================================
-        .ColumnHeaders.Add , , "ID", 40
-        .ColumnHeaders.Add , , "DATA ABERTURA", 70
-        .ColumnHeaders.Add , , "USU√ÅRIO", 110
-        .ColumnHeaders.Add , , "FUNDO", 70
-        .ColumnHeaders.Add , , "SANGRIA", 70
-        .ColumnHeaders.Add , , "VALOR CAIXA", 80
-        .ColumnHeaders.Add , , "ESPERADO", 70
-        .ColumnHeaders.Add , , "STATUS", 70
-
-    End With
-
-    '====================================================
-    ' CARREGA DADOS
-    '====================================================
-    CarregarHistoricoCaixa
 
 End Sub

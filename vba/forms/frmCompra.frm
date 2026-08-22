@@ -16,6 +16,51 @@ Attribute VB_Exposed = False
 Public TipoEntrada As String
 Public NumeroNFE_XML As String
 
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarTemaLv lvNotas
+    AplicarBotaoPrincipal btnSalvar
+    AplicarBotaoPrincipal btnFechar
+    AplicarBotaoPrincipal btnImportar
+    
+End Sub
+
+Private Sub UserForm_initialize()
+
+    TipoEntrada = "MANUAL"
+
+    With lvNotas
+    
+        .View = lvwReport
+        .FullRowSelect = True
+        .Gridlines = False
+        .AllowColumnReorder = True
+        .HideSelection = False
+        
+        .ColumnHeaders.Clear
+        
+        .ColumnHeaders.Add , , "DATA", 80
+        .ColumnHeaders.Add , , "CNPJ", 100
+        .ColumnHeaders.Add , , "FORNECEDOR", 200
+        .ColumnHeaders.Add , , "NUMERO NFE", 90
+        .ColumnHeaders.Add , , "VALOR TOTAL", 90
+        
+    End With
+    
+   
+
+End Sub
+
+Private Sub userform_activate()
+
+    CarregarComboFornecedor cmbFornecedor
+    CarregarNotasXML
+     AplicarPaleta
+    
+End Sub
+
+
 Private Sub btnAtualizar_Click()
         
 ThisWorkbook.RefreshAll
@@ -35,7 +80,7 @@ Private Sub btnImportar_Click()
     End If
 
 CarregarNotasXML
-    'CarregarFornecedores
+    CarregarFornecedores
 
 End Sub
 
@@ -57,43 +102,6 @@ Function SelecionarArquivo() As String
 
 End Function
 
-
-
-Private Sub UserForm_Initialize()
-
-    TipoEntrada = "MANUAL"
-
-    With lvNotas
-    
-        .View = lvwReport
-        .FullRowSelect = True
-        .Gridlines = True
-        .AllowColumnReorder = True
-        .HideSelection = False
-        .Font = Tahoma
-        .Font.Size = 11
-        
-        .ColumnHeaders.Clear
-        
-        .ColumnHeaders.Add , , "DATA", 80
-        .ColumnHeaders.Add , , "CNPJ", 100
-        .ColumnHeaders.Add , , "FORNECEDOR", 200
-        .ColumnHeaders.Add , , "NUMERO NFE", 90
-        .ColumnHeaders.Add , , "VALOR TOTAL", 90
-        
-    End With
-
-    CarregarNotasXML
-    CarregarComboFornecedor cmbFornecedor
-
-End Sub
-
-Private Sub userform_activate()
-
-    CarregarComboFornecedor cmbFornecedor
-    CarregarNotasXML
-
-End Sub
 
 Public Sub CarregarNotasXML()
 

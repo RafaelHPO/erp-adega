@@ -1,11 +1,11 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmUsuarios 
-   Caption         =   "USU√ÅRIOS"
+   Caption         =   "USU¡RIOS"
    ClientHeight    =   6750
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   7905
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmUsuarios.frx":0000
    ShowModal       =   0   'False
    StartUpPosition =   1  'CenterOwner
 End
@@ -14,6 +14,14 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarBotaoPrincipal btnNovoCad
+    AplicarTemaLv lvUsuarios
+
+End Sub
+
 Private Sub UserForm_initialize()
 
   With lvUsuarios
@@ -24,14 +32,15 @@ Private Sub UserForm_initialize()
         .ColumnHeaders.Clear
     End With
 
-    'Cabe√ßalhos
+    'CabeÁalhos
     With lvUsuarios.ColumnHeaders
         .Add , , "ID", 90
         .Add , , "Nome", 160
-        .Add , , "Usu√°rio", 120
+        .Add , , "Usu·rio", 120
     End With
 
     CarregarUsuarios
+    AplicarPaleta
     
 End Sub
 
@@ -46,7 +55,7 @@ Public Sub CarregarUsuarios()
 
     Dim rs As ADODB.Recordset
     Dim sql As String
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     sql = "SELECT IDUSUARIO, NOME, USUARIO FROM TAB_USUARIOS"
 
@@ -57,9 +66,9 @@ Public Sub CarregarUsuarios()
 
     Do While Not rs.EOF
 
-        Set item = lvUsuarios.ListItems.Add(, , rs!idUsuario)
-        item.SubItems(1) = rs!NOME
-        item.SubItems(2) = rs!Usuario
+        Set ITEM = lvUsuarios.ListItems.Add(, , rs!idUsuario)
+        ITEM.SubItems(1) = rs!NOME
+        ITEM.SubItems(2) = rs!Usuario
 
         rs.MoveNext
     Loop
@@ -72,7 +81,7 @@ End Sub
 Private Sub btnEditarUsuario_Click()
 
     If lvUsuarios.SelectedItem Is Nothing Then
-        MsgBox "Selecione um usu√°rio", vbExclamation
+        MsgBox "Selecione um usu·rio", vbExclamation
         Exit Sub
     End If
 
@@ -99,7 +108,7 @@ Private Sub btnExcluirUsuario_Click()
 
     resp = MsgBox("Tem certeza que deseja excluir este usuario?", _
                   vbYesNo + vbQuestion, _
-                  "Confirma√ß√£o")
+                  "ConfirmaÁ„o")
 
     If resp = vbNo Then Exit Sub
 
@@ -107,7 +116,7 @@ Private Sub btnExcluirUsuario_Click()
 
     Conn.Execute sql
 
-    MsgBox "Usuario exclu√≠do com sucesso!", vbInformation
+    MsgBox "Usuario excluÌdo com sucesso!", vbInformation
 
     Call CarregarUsuarios   ' recarrega o ListView
 

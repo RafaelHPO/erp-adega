@@ -17,6 +17,65 @@ Public TipoEntrada As String
 Public NumeroNFE_XML As String
 Public IdCompra As Long
 
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarBotaoPrincipal btnAdcItens
+    AplicarTemaLv lvProdutosEntrada
+
+End Sub
+
+Private Sub UserForm_initialize()
+
+On Error GoTo TratarErro
+
+    With lvProdutosEntrada
+
+        .View = lvwReport
+        .FullRowSelect = True
+        .Gridlines = False
+        .HideSelection = False
+        .CheckBoxes = True
+
+        .ColumnHeaders.Clear
+
+        .ColumnHeaders.Add , , "ID", 90
+        .ColumnHeaders.Add , , "PRODUTO", 220
+        .ColumnHeaders.Add , , "MEDIDA", 60
+        .ColumnHeaders.Add , , "QUANTIDADE", 80
+        .ColumnHeaders.Add , , "CUSTO UNITARIO", 100
+        .ColumnHeaders.Add , , "SUBTOTAL", 90
+
+    End With
+
+    AplicarPaleta
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmConferencia - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
+End Sub
+Private Sub userform_activate()
+
+    Static Carregado As Boolean
+
+    If Carregado Then Exit Sub
+
+    CarregarProdutosEntrada NumeroNFE_XML
+
+    Carregado = True
+
+End Sub
+
 Private Sub btnAdcItens_Click()
 
 On Error GoTo TratarErro
@@ -167,55 +226,6 @@ TratarErro:
 
 End Sub
 
-Private Sub UserForm_Initialize()
-
-On Error GoTo TratarErro
-
-    With lvProdutosEntrada
-
-        .View = lvwReport
-        .FullRowSelect = True
-        .Gridlines = True
-        .HideSelection = False
-        .CheckBoxes = True
-
-        .ColumnHeaders.Clear
-
-        .ColumnHeaders.Add , , "ID", 90
-        .ColumnHeaders.Add , , "PRODUTO", 220
-        .ColumnHeaders.Add , , "MEDIDA", 60
-        .ColumnHeaders.Add , , "QUANTIDADE", 80
-        .ColumnHeaders.Add , , "CUSTO UNITARIO", 100
-        .ColumnHeaders.Add , , "SUBTOTAL", 90
-
-    End With
-
-    Exit Sub
-
-TratarErro:
-
-    modSistema.tela = "frmConferencia - initialize"
-    modSistema.DescErro = Err.Description
-    modSistema.nErro = Err.Number
-
-    Call modSistema.ReportarErro
-    
-    MsgBox "Erro: " & Err.Number & vbCrLf & _
-                        Err.Description, vbInformation, "SISTEMA"
-
-End Sub
-
-Private Sub userform_activate()
-
-    Static Carregado As Boolean
-
-    If Carregado Then Exit Sub
-
-    CarregarProdutosEntrada NumeroNFE_XML
-
-    Carregado = True
-
-End Sub
 Public Function ItemJaLancadoCompra(ByVal IdCompra As Long, ByVal idproduto As Long) As Boolean
 
     Dim rs As ADODB.Recordset

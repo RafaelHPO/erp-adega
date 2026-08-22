@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCadFornecedor 
    Caption         =   "CADASTRO DE FORNECEDOR"
-   ClientHeight    =   4830
+   ClientHeight    =   3840
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   8010
+   ClientWidth     =   7845
    OleObjectBlob   =   "frmCadFornecedor.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -13,10 +13,19 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Sub UserForm_Initialize()
+Private Sub AplicarPaleta()
+    
+    AplicarTema Me
+    AplicarBotaoPrincipal btnSalvar
+
+End Sub
+
+Private Sub UserForm_initialize()
 
 btnSalvarEdit.Visible = False
 btnCancelarEdit.Visible = False
+
+AplicarPaleta
 
 End Sub
 

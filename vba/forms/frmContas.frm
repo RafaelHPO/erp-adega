@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmContas 
    Caption         =   "CONTAS A PAGAR / RECEBER"
-   ClientHeight    =   4305
+   ClientHeight    =   5370
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   7020
+   ClientWidth     =   7035
    OleObjectBlob   =   "frmContas.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -18,6 +18,21 @@ Option Explicit
 Public IdConta As Long
 Public TipoConta As String
 Public ModoNovo As Boolean
+
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarBotaoPrincipal btnBaixarConta
+    AplicarBotaoPrincipal btnexcluir
+    
+End Sub
+
+Private Sub UserForm_initialize()
+
+    CarregarComboFornecedor cmbFornecedor
+    AplicarPaleta
+    
+End Sub
 
 Private Sub txtDataLan_Change()
 
@@ -38,12 +53,6 @@ Private Sub txtDataVen_Change()
 End Sub
 
 
-Private Sub UserForm_Initialize()
-
-    CarregarComboFornecedor cmbFornecedor
-
-End Sub
-
 Public Sub PrepararNovaConta()
 
     cmbFornecedor.ListIndex = -1
@@ -56,7 +65,7 @@ Public Sub PrepararNovaConta()
 
     btnSalvar.Visible = True
     btnBaixarConta.Visible = False
-    btnExcluir.Visible = False
+    btnexcluir.Visible = False
 
 End Sub
 
@@ -124,7 +133,7 @@ Next i
 
     btnSalvar.Visible = False
     btnBaixarConta.Visible = True
-    btnExcluir.Visible = True
+    btnexcluir.Visible = True
 
     rs.Close
     Set rs = Nothing

@@ -1,11 +1,11 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmLicenca 
-   Caption         =   "LICEN√áA"
+   Caption         =   "LICEN«A"
    ClientHeight    =   5190
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   5430
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmLicenca.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmLicenca"
@@ -13,10 +13,17 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarBotaoPrincipal btnSalvar
+    
+End Sub
+
 
 Private Sub UserForm_initialize()
 
-    lblTitulo.Caption = "ATIVA√á√ÉO DO SISTEMA"
+    lblTitulo.Caption = "ATIVA«√O DO SISTEMA"
 
     lblStatus.Caption = MotivoLicenca
 
@@ -35,10 +42,12 @@ Private Sub UserForm_initialize()
     End If
 
 
-    lblVersao.Caption = "Vers√£o " & BuscarConfig("VERSAO_SISTEMA")
+    lblVersao.Caption = "Vers„o " & BuscarConfig("VERSAO_SISTEMA")
 
 
     txtChave.Value = ""
+    
+    AplicarPaleta
 
 End Sub
 
@@ -49,7 +58,7 @@ Private Sub btnAtivar_Click()
 
     If Trim(txtChave.Value) = "" Then
 
-        MsgBox "Informe a chave de ativa√ß√£o.", vbExclamation
+        MsgBox "Informe a chave de ativaÁ„o.", vbExclamation
         txtChave.SetFocus
         Exit Sub
 

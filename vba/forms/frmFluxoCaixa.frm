@@ -15,6 +15,69 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarBotaoPrincipal btnNovaConta
+    AplicarTemaLv lvFluxoCaixa
+    AplicarTemaLv lvPagar
+    AplicarTemaLv lvReceber
+    
+End Sub
+
+Private Sub userform_activate()
+
+    CarregarFluxoCaixa
+
+End Sub
+
+Private Sub UserForm_initialize()
+
+On Error GoTo TratarErro
+
+    With lvFluxoCaixa
+
+        .View = lvwReport
+        .Gridlines = False
+        .AllowColumnReorder = True
+        .HideSelection = False
+        .FullRowSelect = True
+        
+        .ColumnHeaders.Clear
+        .ListItems.Clear
+
+        .ColumnHeaders.Add , , "ANO", 50
+        .ColumnHeaders.Add , , "MÊS", 70
+        .ColumnHeaders.Add , , "ENTRADAS", 80
+        .ColumnHeaders.Add , , "SAÍDAS", 80
+        .ColumnHeaders.Add , , "SALDO", 80
+        .ColumnHeaders.Add , , "N° PEDIDOS", 80
+        .ColumnHeaders.Add , , "TICKET MÉDIO", 100
+        .ColumnHeaders.Add , , "ACUMULADO", 100
+
+    End With
+
+    CarregarFluxoCaixa
+     PreencherLvPagar
+    PreencherLvReceber
+
+    AplicarPaleta
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "FluxoCaixa - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
+End Sub
+
 Private Sub lvFluxoCaixa_DblClick()
 
 On Error GoTo TratarErro
@@ -122,56 +185,7 @@ Private Sub btnNovaConta_Click()
 
 End Sub
 
-Private Sub userform_activate()
 
-    CarregarFluxoCaixa
-
-End Sub
-
-Private Sub UserForm_Initialize()
-
-On Error GoTo TratarErro
-
-    With lvFluxoCaixa
-
-        .View = lvwReport
-        .Gridlines = True
-        .AllowColumnReorder = True
-        .HideSelection = False
-        .FullRowSelect = True
-        
-        .ColumnHeaders.Clear
-        .ListItems.Clear
-
-        .ColumnHeaders.Add , , "ANO", 50
-        .ColumnHeaders.Add , , "MÊS", 70
-        .ColumnHeaders.Add , , "ENTRADAS", 80
-        .ColumnHeaders.Add , , "SAÍDAS", 80
-        .ColumnHeaders.Add , , "SALDO", 80
-        .ColumnHeaders.Add , , "N° PEDIDOS", 80
-        .ColumnHeaders.Add , , "TICKET MÉDIO", 100
-        .ColumnHeaders.Add , , "ACUMULADO", 100
-
-    End With
-
-    CarregarFluxoCaixa
-     PreencherLvPagar
-    PreencherLvReceber
-
-    Exit Sub
-
-TratarErro:
-
-    modSistema.tela = "FluxoCaixa - initialize"
-    modSistema.DescErro = Err.Description
-    modSistema.nErro = Err.Number
-
-    Call modSistema.ReportarErro
-    
-    MsgBox "Erro: " & Err.Number & vbCrLf & _
-                        Err.Description, vbInformation, "SISTEMA"
-
-End Sub
 Private Sub CarregarFluxoCaixa()
 
 On Error GoTo TratarErro
@@ -189,14 +203,14 @@ On Error GoTo TratarErro
 
         ITEM.ListSubItems.Add , , UCase(Format(DateSerial(rs!ano, rs!mes, 1), "mmmm"))
         ITEM.ListSubItems.Add , , FormatCurrency(rs!ENTRADA)
-        ITEM.ListSubItems.Add , , FormatCurrency(rs!SAIDA)
+        ITEM.ListSubItems.Add , , FormatCurrency(rs!Saida)
         ITEM.ListSubItems.Add , , FormatCurrency(rs!SALDO)
         ITEM.ListSubItems.Add , , rs!PEDIDOS
         ITEM.ListSubItems.Add , , FormatCurrency(rs!TM)
         ITEM.ListSubItems.Add , , FormatCurrency(rs!ACUMULADO)
 
         txtEntrada.Value = FormatCurrency(rs!ENTRADA)
-        txtSaida.Value = FormatCurrency(rs!SAIDA)
+        txtSaida.Value = FormatCurrency(rs!Saida)
         txtSaldo.Value = FormatCurrency(rs!SALDO)
         txtAcumulado.Value = FormatCurrency(rs!ACUMULADO)
         
@@ -283,7 +297,7 @@ On Error GoTo TratarErro
         .ListItems.Clear
         .ColumnHeaders.Clear
         .View = lvwReport
-        .Gridlines = True
+        .Gridlines = False
         .FullRowSelect = True
 
         .ColumnHeaders.Add , , "VENCIMENTO", 90
@@ -341,7 +355,7 @@ On Error GoTo TratarErro
         .ListItems.Clear
         .ColumnHeaders.Clear
         .View = lvwReport
-        .Gridlines = True
+        .Gridlines = False
         .FullRowSelect = True
 
         .ColumnHeaders.Add , , "VENCIMENTO", 90

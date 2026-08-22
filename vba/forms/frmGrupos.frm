@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmGrupos
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   7710
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmGrupos.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmGrupos"
@@ -13,12 +13,11 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+Private Sub AplicarPaleta()
 
-    If KeyCode = vbKeyEscape Then
-        Unload Me
-    End If
-
+    AplicarTema Me
+    AplicarTemaLv lvGrupos
+    
 End Sub
 
 Private Sub UserForm_initialize()
@@ -43,7 +42,7 @@ End Sub
 Public Sub CarregarGrupos()
 
     Dim rs As ADODB.Recordset
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     Set rs = Conn.Execute("SELECT IDGRUPO,DESCRICAO FROM TAB_GRUPOS ORDER BY DESCRICAO")
 
@@ -51,9 +50,9 @@ Public Sub CarregarGrupos()
 
     Do While Not rs.EOF
 
-        Set item = lvGrupos.ListItems.Add(, , rs!IdGrupo)
+        Set ITEM = lvGrupos.ListItems.Add(, , rs!IdGrupo)
 
-        item.SubItems(1) = Nz(rs!DESCRICAO)
+        ITEM.SubItems(1) = Nz(rs!DESCRICAO)
 
         rs.MoveNext
 

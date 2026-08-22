@@ -15,7 +15,102 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-Private Carregando As Boolean
+Private carregando As Boolean
+
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarTemaLv lvProdutosCadastro
+    AplicarBotaoPrincipal btnNovoProd
+
+End Sub
+
+Private Sub UserForm_initialize()
+
+On Error GoTo TratarErro
+
+    carregando = True
+
+    With lvProdutosCadastro
+        .View = lvwReport
+        .FullRowSelect = True
+        .Gridlines = True
+        .HideSelection = False
+        .ColumnHeaders.Clear
+    End With
+
+    With lvProdutosCadastro.ColumnHeaders
+        .Add , , "ID", 40
+        .Add , , "NOME", 240
+        .Add , , "EST MINIMO", 80
+        .Add , , "EST ATUAL", 80
+        .Add , , "CUSTO", 70
+        .Add , , "PREÇO VENDA", 90
+        .Add , , "VALOR ESTOQUE", 90
+        .Add , , "LUCRO ESTIMADO", 110
+        .Add , , "TIPO", 70
+        .Add , , "STATUS", 70
+    End With
+
+    CarregarIndicadores
+    CarregarProdutos
+
+    CarregarProdutosCombo cmbProduto
+With cmbCategoria
+
+    .Clear
+    .ColumnCount = 2
+    .ColumnWidths = "0 pt;120 pt"
+
+    .AddItem 0
+    .List(.ListCount - 1, 1) = "TODOS"
+
+End With
+
+CarregarCategorias cmbCategoria
+    CarregarSetor cmbSetor
+
+    cmbTipo.List = Array("TODOS", "UNIT", "COMBO")
+    cmbStatus.List = Array("TODOS", "ATIVO", "INATIVO")
+
+    cmbCategoria.AddItem "TODOS", 0
+    cmbSetor.AddItem "TODOS", 0
+
+    cmbCategoria.ListIndex = 1
+    cmbSetor.ListIndex = 0
+    cmbTipo.ListIndex = 0
+    cmbStatus.ListIndex = 1
+
+    carregando = False
+    fraCombo.Visible = False
+    
+    AplicarPaleta
+    
+    With Label15
+    .Font.Size = 11
+    End With
+    
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmProdutos - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
+End Sub
+
+Private Sub userform_activate()
+
+    CarregarIndicadores
+    CarregarProdutos
+    
+End Sub
 
 Private Sub btnAcerto_Click()
 
@@ -83,85 +178,6 @@ Private Sub lvProdutosCadastro_dblclick()
 
 End Sub
 
-Private Sub UserForm_Initialize()
-
-On Error GoTo TratarErro
-
-    Carregando = True
-
-    With lvProdutosCadastro
-        .View = lvwReport
-        .FullRowSelect = True
-        .Gridlines = True
-        .HideSelection = False
-        .ColumnHeaders.Clear
-    End With
-
-    With lvProdutosCadastro.ColumnHeaders
-        .Add , , "ID", 60
-        .Add , , "NOME", 250
-        .Add , , "ESTOQUE", 80
-        .Add , , "CUSTO", 90
-        .Add , , "PREÇO VENDA", 100
-        .Add , , "SALDO ESTOQUE", 100
-        .Add , , "LUCRO ESTIMADO", 120
-        .Add , , "TIPO", 80
-        .Add , , "STATUS", 80
-    End With
-
-    CarregarIndicadores
-    CarregarProdutos
-
-    CarregarProdutosCombo cmbProduto
-With cmbCategoria
-
-    .Clear
-    .ColumnCount = 2
-    .ColumnWidths = "0 pt;120 pt"
-
-    .AddItem 0
-    .List(.ListCount - 1, 1) = "TODOS"
-
-End With
-
-CarregarCategorias cmbCategoria
-    CarregarSetor cmbSetor
-
-    cmbTipo.List = Array("TODOS", "UNIT", "COMBO")
-    cmbStatus.List = Array("TODOS", "ATIVO", "INATIVO")
-
-    cmbCategoria.AddItem "TODOS", 0
-    cmbSetor.AddItem "TODOS", 0
-
-    cmbCategoria.ListIndex = 1
-    cmbSetor.ListIndex = 0
-    cmbTipo.ListIndex = 0
-    cmbStatus.ListIndex = 1
-
-    Carregando = False
-    fraCombo.Visible = False
-
-    Exit Sub
-
-TratarErro:
-
-    modSistema.tela = "frmProdutos - initialize"
-    modSistema.DescErro = Err.Description
-    modSistema.nErro = Err.Number
-
-    Call modSistema.ReportarErro
-    
-    MsgBox "Erro: " & Err.Number & vbCrLf & _
-                        Err.Description, vbInformation, "SISTEMA"
-
-End Sub
-
-Private Sub userform_activate()
-
-    CarregarIndicadores
-    CarregarProdutos
-    
-End Sub
 
 Private Sub btnNovoProd_Click()
 
@@ -172,35 +188,35 @@ End Sub
 
 Private Sub cmbCategoria_Change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
     AtualizarTela
 
 End Sub
 
 Private Sub cmbSetor_Change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
     AtualizarTela
 
 End Sub
 
 Private Sub cmbTipo_Change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
     AtualizarTela
 
 End Sub
 
 Private Sub cmbStatus_change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
     AtualizarTela
 
 End Sub
 
 Private Sub cmbProduto_change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
     AtualizarTela
 
 End Sub
@@ -260,7 +276,7 @@ On Error GoTo TratarErro
     Dim ITEM As ListItem
 
     sql = "SELECT IDPRODUTO, UPPER(NOME) NOME, TIPO, " & _
-          "ESTOQUEATUAL, CUSTOUNITARIO, PRECOVENDA, UPPER(STATUS) AS STATUS, " & _
+          "ESTOQUEATUAL, ESTOQUEMINIMO, CUSTOUNITARIO, PRECOVENDA, UPPER(STATUS) STATUS, " & _
           "(ESTOQUEATUAL * CUSTO) AS SALDOESTOQUE, " & _
           "((PRECOVENDA - CUSTO) * ESTOQUEATUAL) AS LUCROESTIMADO " & _
           "FROM TAB_PRODUTOS "
@@ -278,13 +294,18 @@ On Error GoTo TratarErro
         Set ITEM = lvProdutosCadastro.ListItems.Add(, , Nz(rs!idproduto))
 
         ITEM.SubItems(1) = Nz(rs!NOME)
-        ITEM.SubItems(2) = Nz(rs!ESTOQUEATUAL)
-        ITEM.SubItems(3) = Format(NzDbl(rs!CUSTOUNITARIO), "R$   #,##0.00")
-        ITEM.SubItems(4) = Format(NzDbl(rs!PRECOVENDA), "R$   #,##0.00")
-        ITEM.SubItems(5) = Format(NzDbl(rs!SALDOESTOQUE), "R$   #,##0.00")
-        ITEM.SubItems(6) = Format(NzDbl(rs!LUCROESTIMADO), "R$   #,##0.00")
-        ITEM.SubItems(7) = Nz(rs!tipo)
-        ITEM.SubItems(8) = Nz(rs!STATUS)
+        ITEM.SubItems(2) = Nz(rs!ESTOQUEMINIMO)
+        ITEM.SubItems(3) = Nz(rs!ESTOQUEATUAL)
+        ITEM.SubItems(4) = Format(NzDbl(rs!CUSTOUNITARIO), "$   #,##0.00")
+        ITEM.SubItems(5) = Format(NzDbl(rs!PRECOVENDA), "$   #,##0.00")
+        ITEM.SubItems(6) = Format(NzDbl(rs!SALDOESTOQUE), "$   #,##0.00")
+        ITEM.SubItems(7) = Format(NzDbl(rs!LUCROESTIMADO), "$   #,##0.00")
+        ITEM.SubItems(8) = Nz(rs!tipo)
+        ITEM.SubItems(9) = Nz(rs!STATUS)
+
+             If Nz(rs!ESTOQUEATUAL, 0) < Nz(rs!ESTOQUEMINIMO, 0) Then
+            ITEM.ListSubItems(3).ForeColor = vbRed
+        End If
 
         rs.MoveNext
 

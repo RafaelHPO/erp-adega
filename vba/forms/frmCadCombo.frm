@@ -13,15 +13,17 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+Private Sub AplicarPaleta()
 
-    If KeyCode = vbKeyEscape Then
-        Unload Me
-    End If
+    AplicarTema Me
+    AplicarTemaLv lvItensCombo
 
 End Sub
 
-Private Sub UserForm_Initialize()
+
+Private Sub UserForm_initialize()
+
+On Error GoTo TratarErro
 
 CarregarCategorias cmbCategoria
    CarregarUnidadesMedida cmbUM
@@ -29,7 +31,7 @@ CarregarCategorias cmbCategoria
 With lvItensCombo
 
     .View = lvwReport
-    .Gridlines = True
+    .Gridlines = False
     .FullRowSelect = True
     .HideSelection = False
 
@@ -60,7 +62,75 @@ Label2.Visible = False
 Label3.Visible = False
 txtIdCombo.Visible = False
 
+AplicarPaleta
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmCadCombo - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
        
+End Sub
+
+Private Sub userform_activate()
+
+On Error GoTo TratarErro
+
+    CarregarProdutosCombo cmbProduto
+    
+  lvItensCombo.Visible = False
+    DoEvents
+    AjustarLayout
+    lvItensCombo.Visible = True
+
+ If Trim(txtIdCombo.Value) <> "" Then
+
+    CarregarCabecalhoCombo
+
+    btnCriar.Visible = False
+
+    txtNome.Enabled = True
+    cmbCategoria.Enabled = True
+    cmbUM.Enabled = True
+    txtMarca.Enabled = True
+    txtPrecoVenda.Enabled = True
+
+    txtEAN5.Visible = True
+    cmbProduto.Visible = True
+    txtQuantidade.Visible = True
+    lvItensCombo.Visible = True
+    btnAdicionar.Visible = True
+    btnRemover.Visible = True
+    btnSalvar.Visible = True
+    btnCancelar.Visible = True
+    Label1.Visible = True
+Label7.Visible = True
+Label2.Visible = True
+Label3.Visible = True
+txtIdCombo.Visible = True
+
+End If
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmCadCombo - activate"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub AjustarLayout()
@@ -83,6 +153,8 @@ Private Sub btnCancelar_Click()
 End Sub
 
 Private Sub btnCriar_Click()
+
+On Error GoTo TratarErro
 
     Dim sql As String
     Dim rs As ADODB.Recordset
@@ -143,45 +215,21 @@ Label2.Visible = True
 Label3.Visible = True
 txtIdCombo.Visible = True
 
-End Sub
-Private Sub userform_activate()
+    Exit Sub
 
-    CarregarProdutosCombo cmbProduto
+TratarErro:
+
+    modSistema.tela = "CadCombo - btnCriar"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
     
-  lvItensCombo.Visible = False
-    DoEvents
-    AjustarLayout
-    lvItensCombo.Visible = True
-
- If Trim(txtIdCombo.Value) <> "" Then
-
-    CarregarCabecalhoCombo
-
-    btnCriar.Visible = False
-
-    txtNome.Enabled = True
-    cmbCategoria.Enabled = True
-    cmbUM.Enabled = True
-    txtMarca.Enabled = True
-    txtPrecoVenda.Enabled = True
-
-    txtEAN5.Visible = True
-    cmbProduto.Visible = True
-    txtQuantidade.Visible = True
-    lvItensCombo.Visible = True
-    btnAdicionar.Visible = True
-    btnRemover.Visible = True
-    btnSalvar.Visible = True
-    btnCancelar.Visible = True
-    Label1.Visible = True
-Label7.Visible = True
-Label2.Visible = True
-Label3.Visible = True
-txtIdCombo.Visible = True
-
-End If
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
+
 
 Private Sub txtEAN5_AfterUpdate()
 
@@ -190,6 +238,8 @@ Private Sub txtEAN5_AfterUpdate()
 End Sub
 
 Private Sub cmbProduto_afterupdate()
+
+On Error GoTo TratarErro
 
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -225,9 +275,25 @@ Private Sub cmbProduto_afterupdate()
 
         End If
     End If
+    
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmCadCombo - cmbProduto change"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+                        
 End Sub
 
 Private Sub CarregarCabecalhoCombo()
+
+On Error GoTo TratarErro
 
     Dim rs As ADODB.Recordset
     Dim sql As String
@@ -247,7 +313,7 @@ Private Sub CarregarCabecalhoCombo()
 
     If Not rs.EOF Then
 
-        txtIdCombo.Value = rs!idproduto
+        txtIdCombo.Value = Nz(rs!idproduto)
         txtNome.Value = Nz(rs!NOME)
         
                Dim i As Long
@@ -270,9 +336,24 @@ Next i
 
     CarregarItensCombo
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadCombo - cabeçalho combo"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub CarregarItensCombo()
+
+On Error GoTo TratarErro
 
     Dim rs As New ADODB.Recordset
     Dim ITEM As ListItem
@@ -291,9 +372,9 @@ Private Sub CarregarItensCombo()
 
         Set ITEM = lvItensCombo.ListItems.Add(, , rs!IDITEMCOMBO)
 
-        ITEM.SubItems(1) = rs!NOME
-        ITEM.SubItems(2) = rs!QUANTIDADE
-        ITEM.SubItems(3) = Format(rs!Custo, "0.00")
+        ITEM.SubItems(1) = Nz(rs!NOME)
+        ITEM.SubItems(2) = Nz(rs!QUANTIDADE)
+        ITEM.SubItems(3) = Format(Nz(rs!Custo, "0.00"))
         ITEM.SubItems(4) = Nz(rs!ESTOQUEATUAL)
 
         rs.MoveNext
@@ -302,9 +383,24 @@ Private Sub CarregarItensCombo()
 
     rs.Close
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadCombo - lv itenscombo"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub btnAdicionar_Click()
+
+On Error GoTo TratarErro
 
     Dim sql As String
 
@@ -335,9 +431,24 @@ txtEAN5.SetFocus
 
 MsgBox "Item adicionado.", vbInformation
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadCombo - btnAdicionar"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 
 Private Sub btnRemover_Click()
+
+On Error GoTo TratarErro
 
     Dim sql As String
     Dim rs As ADODB.Recordset
@@ -366,8 +477,23 @@ sql = "CALL PROC_REMOVEITEMCOMBO(" & _
 
 CarregarItensCombo
 
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadCombo - brnRemover"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
 End Sub
 Private Sub btnSalvar_Click()
+
+On Error GoTo TratarErro
 
     Dim sql As String
     Dim rs As ADODB.Recordset
@@ -408,6 +534,19 @@ Private Sub btnSalvar_Click()
     MsgBox "Combo salvo com sucesso.", vbInformation
 
     Unload Me
+
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "CadCombo - btnSalvar"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
 
 End Sub
 

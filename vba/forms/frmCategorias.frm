@@ -5,7 +5,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCategorias
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   7710
-   ' OleObjectBlob removido na versao publica
+   OleObjectBlob   =   "frmCategorias.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "frmCategorias"
@@ -13,13 +13,15 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
 
-Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+Private Sub AplicarPaleta()
 
-    If KeyCode = vbKeyEscape Then
-        Unload Me
-    End If
-
+    AplicarTema Me
+    AplicarTemaLv lvCategorias
+    AplicarBotaoPrincipal btnNovaCategoria
+    AplicarBotaoPrincipal btnExcluirCategoria
+    
 End Sub
 
 Private Sub UserForm_initialize()
@@ -35,7 +37,7 @@ btnSalvar.Visible = False
     With lvCategorias
 
         .View = lvwReport
-        .Gridlines = True
+        .Gridlines = False
         .FullRowSelect = True
         .HideSelection = False
 
@@ -48,6 +50,7 @@ btnSalvar.Visible = False
     End With
 
     CarregarCategorias
+    AplicarPaleta
 
 End Sub
 
@@ -74,7 +77,7 @@ End Sub
 Public Sub CarregarCategorias()
 
     Dim rs As ADODB.Recordset
-    Dim item As ListItem
+    Dim ITEM As ListItem
 
     Set rs = Conn.Execute( _
         "SELECT IDCATEGORIA, DESCRICAO, MARKUP " & _
@@ -85,10 +88,10 @@ Public Sub CarregarCategorias()
 
     Do While Not rs.EOF
 
-        Set item = lvCategorias.ListItems.Add(, , rs!IdCategoria)
+        Set ITEM = lvCategorias.ListItems.Add(, , rs!IdCategoria)
 
-        item.SubItems(1) = Nz(rs!DESCRICAO)
-        item.SubItems(2) = Format(Nz(rs!Markup), "0") & " %"
+        ITEM.SubItems(1) = Nz(rs!DESCRICAO)
+        ITEM.SubItems(2) = Format(Nz(rs!Markup), "0") & " %"
 
         rs.MoveNext
 
@@ -148,7 +151,7 @@ Private Sub btnSalvar_Click()
 
     If Trim(txtDescricao.Value) = "" Then
 
-        MsgBox "Informe a descriÃ§Ã£o.", vbExclamation
+        MsgBox "Informe a descrição.", vbExclamation
         Exit Sub
 
     End If

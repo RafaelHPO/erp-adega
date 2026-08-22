@@ -13,11 +13,24 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Private Sub AplicarPaleta()
 
-Private Sub UserForm_Initialize()
+    AplicarTema Me
+    AplicarBotaoPrincipal btnEntrar
+    
+End Sub
 
-    lblSistema.Caption = "ADEGA BLACK BOX"
+Private Sub UserForm_initialize()
 
+    AplicarPaleta
+    
+    With lblSistema
+    .Caption = "ADEGA BLACK BOX"
+    .FontSize = 24
+    End With
+    Usuario.FontSize = 16
+    Senha.FontSize = 16
+    
     If Conn.State = 1 Then
 
         lblBanco.Caption = "Banco conectado"

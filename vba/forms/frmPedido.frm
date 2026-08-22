@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmPedido 
    Caption         =   "Pedido"
-   ClientHeight    =   8790.001
+   ClientHeight    =   9360.001
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   15810
+   ClientWidth     =   16155
    OleObjectBlob   =   "frmPedido.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -13,10 +13,104 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+
 Private abrirPagamento As Boolean
 Private idVendaPagamento As Long
 Private bloqueioUI As Boolean
 Public editandoitem As Boolean
+
+Private Sub AplicarPaleta()
+    
+    AplicarTema Me
+    AplicarTemaLv lvProdutos
+    AplicarTemaLv lvCombos
+    AplicarBotaoPrincipal btnAdcItem
+    AplicarBotaoPrincipal btnExcluirItem
+    AplicarBotaoPrincipal btnCancelarVenda
+    AplicarBotaoPrincipal btnPagamento
+    AplicarBotaoPrincipal btnFecharVenda
+    
+End Sub
+
+Private Sub UserForm_initialize()
+
+On Error GoTo TratarErro
+
+    With lvProdutos
+
+        .View = lvwReport
+        .FullRowSelect = True
+        .Gridlines = True
+        .HideSelection = False
+        .AllowColumnReorder = True
+
+        .ColumnHeaders.Clear
+
+        .ColumnHeaders.Add , , "ID", 60
+        .ColumnHeaders.Add , , "PRODUTO", 240
+        .ColumnHeaders.Add , , "QTDE", 60
+        .ColumnHeaders.Add , , "PREÇO", 80
+        .ColumnHeaders.Add , , "SUBTOTAL", 90
+
+    End With
+
+    CarregarProdutosCombo cmbProduto
+    CarregarReferenciaVenda
+    AplicarPaleta
+    txtEAN5.SetFocus
+    
+    
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+    
+End Sub
+Private Sub userform_activate()
+
+    On Error GoTo TratarErro
+
+    If Trim(txtIdVenda.Value) <> "" Then
+
+        CarregarItensVenda
+CarregarReferenciaVenda
+    End If
+    
+      If abrirPagamento Then
+
+        abrirPagamento = False
+
+        Set frmPagamento = New frmPagamento
+        frmPagamento.idvenda = idVendaPagamento
+        frmPagamento.Show vbModeless
+
+    End If
+ txtEAN5.SetFocus
+ 
+     Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - activate"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+ 
+End Sub
+
 
 Private Function VendaAberta() As Boolean
 
@@ -35,7 +129,7 @@ Private Function VendaAberta() As Boolean
 
     If Not rs.EOF Then
 
-        If UCase(rs!STATUS) = "ABERTO" Then
+        If UCase(rs!status) = "ABERTO" Then
 
             VendaAberta = True
         End If
@@ -56,6 +150,11 @@ Private Sub btnEditarItem_Click()
     Dim idproduto As Long
     Dim idvenda As Long
     
+    If lvProdutos.SelectedItem Is Nothing Then
+          MsgBox "Selecione um produto para editar", vbInformation
+        Exit Sub
+    End If
+    
     editandoitem = True
     
     idproduto = lvProdutos.SelectedItem.Text
@@ -63,7 +162,7 @@ Private Sub btnEditarItem_Click()
   
         cmbProduto = idproduto
         
-            Call cmbProduto_afterupdate
+           'cmbProduto_afterupdate comentado pois o evento é change entao ja roda quando atribui o produto no cmb
     
     sql = " select sum(iv.quantidade) as qtde from tab_itensvenda iv " & _
           " where iv.idproduto = " & idproduto & _
@@ -75,12 +174,20 @@ Private Sub btnEditarItem_Click()
     
             txtQuantidade.Value = Nz(rs!qtde)
             
-        rs.Close
-        Set rs = Nothing
+            rs.Close
+            Set rs = Nothing
         
+        End If
+    
+    If Trim(txtTipo.Value) = "UNIT" Then
+    
+        sql = " call PROC_EDITARITEMVENDA(" & IDUsuarioLogado & ", " & idproduto & ", " & idvenda & ") "
+    
+    Else
+        
+        sql = "call PROC_RETIRARITENSVENDA(" & idvenda & ", " & IDUsuarioLogado & ", " & idproduto & ", " & lvProdutos.SelectedItem.SubItems(2) & ") "
     End If
-
-    sql = " call PROC_EDITARITEMVENDA(" & IDUsuarioLogado & ", " & idproduto & ", " & idvenda & ") "
+    
     
     Conn.Execute sql
     
@@ -102,8 +209,23 @@ TratarErro:
 End Sub
 
 Private Sub lvprodutos_dblclick()
-
+    
+    On Error GoTo TratarErro
+    
   Call btnEditarItem_Click
+    
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmPedido - lv dbl click edit"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
     
 End Sub
 
@@ -184,93 +306,15 @@ FormatarMoeda txtDesconto
 
 End Sub
 
-Private Sub txtquantidade_afterupdate()
+Private Sub txtQuantidade_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
 
-    btnAdcItem.SetFocus
-    
-End Sub
+    If KeyCode = vbKeyReturn Then
 
-Private Sub txtsubtotal_activate()
-
- btnAdcItem.SetFocus
-
-End Sub
-
-
-Private Sub UserForm_Initialize()
-
-On Error GoTo TratarErro
-
-    With lvProdutos
-
-        .View = lvwReport
-        .FullRowSelect = True
-        .Gridlines = True
-        .HideSelection = False
-        .AllowColumnReorder = True
-
-        .ColumnHeaders.Clear
-
-        .ColumnHeaders.Add , , "ID", 60
-        .ColumnHeaders.Add , , "PRODUTO", 220
-        .ColumnHeaders.Add , , "QTDE", 60
-        .ColumnHeaders.Add , , "PREÇO", 80
-        .ColumnHeaders.Add , , "SUBTOTAL", 90
-
-    End With
-
-    CarregarProdutosCombo cmbProduto
-    CarregarReferenciaVenda
-    txtEAN5.SetFocus
-    
-        Exit Sub
-
-TratarErro:
-
-    modSistema.tela = "frmPedido - initialize"
-    modSistema.DescErro = Err.Description
-    modSistema.nErro = Err.Number
-
-    Call modSistema.ReportarErro
-    
-    MsgBox "Erro: " & Err.Number & vbCrLf & _
-                        Err.Description, vbInformation, "SISTEMA"
-    
-End Sub
-Private Sub userform_activate()
-
-    On Error GoTo TratarErro
-
-    If Trim(txtIdVenda.Value) <> "" Then
-
-        CarregarItensVenda
-CarregarReferenciaVenda
-    End If
-    
-      If abrirPagamento Then
-
-        abrirPagamento = False
-
-        Set frmPagamento = New frmPagamento
-        frmPagamento.idvenda = idVendaPagamento
-        frmPagamento.Show vbModeless
+        KeyCode = 0
+        btnAdcItem.SetFocus
 
     End If
- txtEAN5.SetFocus
- 
-     Exit Sub
 
-TratarErro:
-
-    modSistema.tela = "frmPedido - activate"
-    modSistema.DescErro = Err.Description
-    modSistema.nErro = Err.Number
-
-    Call modSistema.ReportarErro
-    
-    MsgBox "Erro: " & Err.Number & vbCrLf & _
-                        Err.Description, vbInformation, "SISTEMA"
- 
 End Sub
 
 Private Sub CarregarReferenciaVenda()
@@ -395,7 +439,13 @@ Private Sub txtEAN5_AfterUpdate()
     txtQuantidade.SetFocus
 End Sub
 
-Private Sub cmbProduto_afterupdate()
+Private Sub cmgproduto_afterupdate()
+
+    txtQuantidade.SetFocus
+
+End Sub
+
+Private Sub cmbProduto_change()
 
 On Error GoTo TratarErro
 
@@ -424,8 +474,6 @@ On Error GoTo TratarErro
 
     rs.Close
     Set rs = Nothing
-    
-'txtQuantidade.SetFocus
 
     Exit Sub
 
@@ -476,8 +524,27 @@ End If
         Exit Sub
     End If
 
+    If Trim(CStr(txtTipo.Value)) = "COMBO" Then
+     
+            sql = "select count(*) combo from tab_itenscombo where idcombo = " & cmbProduto.Column(0)
+                Set rs = Conn.Execute(sql)
+                  
+            If Not rs.EOF Then
+                If rs!combo = 0 Then
+                   MsgBox "O produto selecionado é um COMBO, mas não possui itens cadastrados." & vbCrLf & vbCrLf & _
+                          "Cadastre os produtos que fazem parte deste combo em:" & vbCrLf & _
+                          "Produtos > Combos > Editar Combo > Adicionar itens.", _
+                          vbExclamation, "SISTEMA"
+                           Exit Sub
+                    End If
+                End If
+            rs.Close
+            Set rs = Nothing
+    End If
+        
     preco = Replace(txtPreco.Value, ",", ".")
-
+    
+    sql = ""
    sql = "CALL PROC_ADCITENSVENDA(" & _
       NzDbl(txtIdVenda.Value) & "," & _
       NzDbl(IDUsuarioLogado) & "," & _
@@ -492,13 +559,23 @@ End If
 
         If Not rs.EOF Then
 
-            MsgBox rs.Fields(0).Value, vbInformation
+             If Nz(rs!PRODUTO, "") <> "" Then
+    
+            MsgBox rs!MSG & vbCrLf & vbCrLf & "PRODUTO: " & rs!PRODUTO, _
+                   vbExclamation, "SISTEMA"
+            
+            Else
+            
+                MsgBox rs!MSG, _
+                       vbInformation, "SISTEMA"
+            
+            End If
+    
+            rs.Close
 
         End If
-
-        rs.Close
-
     End If
+    
 
     Set rs = Nothing
 
@@ -528,6 +605,10 @@ End Sub
 Private Sub btnExcluirItem_Click()
 
 On Error GoTo TratarErro
+
+frmSenha.supervisor = True
+
+If Not SolicitarSenhaCaixa() Then Exit Sub
 
     Dim cmd As ADODB.Command
 
@@ -585,6 +666,8 @@ End Sub
 Private Sub btnCancelarVenda_Click()
 
 On Error GoTo TratarErro
+
+frmSenha.supervisor = True
 
 If Not SolicitarSenhaCaixa() Then Exit Sub
 
@@ -781,13 +864,14 @@ End Sub
 Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
 
     If editandoitem = True Then
+        If Trim(cmbProduto.Value) <> "" Then
+            
+            MsgBox "Não é possível fechar " & vbCrLf & _
+                   "Enquanto edita um item!", vbInformation, "AVISO"
         
-        MsgBox "Não é possível fechar " & vbCrLf & _
-               "Enquanto edita um item!", vbInformation, "AVISO"
-        
-        Cancel = True
-        Exit Sub
-        
+            Cancel = True
+           Exit Sub
+       End If
     End If
 
     If CloseMode = vbFormControlMenu Then

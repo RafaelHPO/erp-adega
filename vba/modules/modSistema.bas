@@ -1,10 +1,25 @@
 Attribute VB_Name = "modSistema"
 Public gAbrirPagamento As Boolean
 Public gIdVenda As Long
+Public tela As String
+Public nErro As Long
+Public DescErro As String
 
 Private Sub Workbook_Open()
     VerificarFila
 End Sub
+
+Public Sub AguardarSegundos(ByVal Segundos As Double)
+
+    Dim Inicio As Double
+    Inicio = Timer
+
+    Do While Timer - Inicio < Segundos
+        DoEvents
+    Loop
+
+End Sub
+
 Public Function BuscarConfig(Chave As String) As String
 
     Dim rs As ADODB.Recordset
@@ -136,7 +151,7 @@ Public Sub FecharSistema()
 
     Application.DisplayAlerts = False
 
-    ' Fecha conexão com banco se existir
+    ' Fecha conex�o com banco se existir
     If Not Conn Is Nothing Then
         
         If Conn.State = 1 Then
@@ -171,39 +186,11 @@ Public Sub LiberarModoAdmin()
     Application.DisplayAlerts = True
 
 End Sub
-Public Sub VoltarModoSistema()
-
-    Dim uf As Object
-
-    'Fecha todos os UserForms abertos
-    For Each uf In VBA.UserForms
-        Unload uf
-    Next uf
-
-    Application.ScreenUpdating = True
-    Application.DisplayAlerts = True
-
-    'Fecha o editor VBA se estiver aberto
-    On Error Resume Next
-    Application.VBE.MainWindow.Close
-    On Error GoTo 0
-
-    'Valida usuário logado
-    If IDUsuarioLogado = 0 Or IsNull(IDUsuarioLogado) Then
-        
-        Application.Visible = False
-        frmLogin.Show
-        
-    Else
-        
-        Application.Visible = False
-        frmPrincipal.Show
-        
-    End If
-
-End Sub
 
 Public Function SolicitarSenhaCaixa() As Boolean
+
+    'frmSenha.supervisor = True
+    frmSenha.admin = False
 
     frmSenha.SenhaValida = False
     frmSenha.txtSenha.Value = ""
@@ -211,6 +198,20 @@ Public Function SolicitarSenhaCaixa() As Boolean
     frmSenha.Show vbModal
 
     SolicitarSenhaCaixa = frmSenha.SenhaValida
+
+End Function
+
+Public Function SolicitarSenhaAdmin() As Boolean
+
+    frmSenha.admin = True
+    frmSenha.supervisor = False
+
+    frmSenha.SenhaValida = False
+    frmSenha.txtSenha.Value = ""
+
+    frmSenha.Show vbModal
+
+    SolicitarSenhaAdmin = frmSenha.SenhaValida
 
 End Function
 
@@ -237,14 +238,14 @@ Public Function ConfirmarSenha() As Boolean
 
     Dim Senha As String
 
-    Senha = InputBox("Digite sua senha para continuar:", "Confirmação")
+    Senha = InputBox("Digite sua senha para continuar:", "Confirma��o")
 
     If Len(Trim(Senha)) = 0 Then Exit Function
 
     ConfirmarSenha = ValidarSenha(Senha)
 
     If Not ConfirmarSenha Then
-        MsgBox "Senha inválida.", vbExclamation
+        MsgBox "Senha inv�lida.", vbExclamation
     End If
 
 End Function
@@ -254,7 +255,7 @@ Public Function MostrarResumoCaixa(Optional Operacao As String = "") As Boolean
     Dim rs As ADODB.Recordset
     Dim sql As String
     Dim Resumo As String
-    Dim Resposta As VbMsgBoxResult
+    Dim resposta As VbMsgBoxResult
 
     sql = "CALL PROC_RESUMOCAIXA()"
 
@@ -277,7 +278,7 @@ Public Function MostrarResumoCaixa(Optional Operacao As String = "") As Boolean
 
     Resumo = Resumo & _
              "PIX.................. " & Format(rs("PIX"), "R$ #,##0.00") & vbCrLf & _
-             "CARTÃO............... " & Format(rs("CARTAO"), "R$ #,##0.00") & vbCrLf & _
+             "CART�O............... " & Format(rs("CARTAO"), "R$ #,##0.00") & vbCrLf & _
              "DINHEIRO............. " & Format(rs("DINHEIRO"), "R$ #,##0.00") & vbCrLf & vbCrLf & _
              "FUNDO INICIAL........ " & Format(rs("FUNDO"), "R$ #,##0.00") & vbCrLf & _
              "SANGRIAS............ " & Format(rs("SANGRIA"), "R$ #,##0.00") & vbCrLf & _
@@ -289,12 +290,12 @@ Public Function MostrarResumoCaixa(Optional Operacao As String = "") As Boolean
 
     If Operacao = "" Then Operacao = "continuar"
 
-    Resposta = MsgBox(Resumo & vbCrLf & vbCrLf & _
+    resposta = MsgBox(Resumo & vbCrLf & vbCrLf & _
                       "Deseja " & Operacao & "?", _
                       vbQuestion + vbYesNo, _
                       "Resumo do Caixa")
 
-    MostrarResumoCaixa = (Resposta = vbYes)
+    MostrarResumoCaixa = (resposta = vbYes)
 
 End Function
 
@@ -302,81 +303,58 @@ Public Sub manutencao()
 
     On Error GoTo TrataErro
 
-    Dim Senha As String
-    Dim sql As String
-    Dim rs As ADODB.Recordset
+    If Not SolicitarSenhaAdmin() Then Exit Sub
 
-    Senha = InputBox("Senha de administrador:")
-
-    If Trim(Senha) = "" Then
-        MsgBox "DIGITE UMA SENHA", vbInformation
-        Exit Sub
-    End If
-
-    sql = "SELECT COUNT(*) AS ACESSO " & _
-          "FROM TAB_CONFIG " & _
-          "WHERE CHAVE = 'SENHA_ADMIN' " & _
-          "AND VALOR = SHA2('" & Replace(Senha, "'", "''") & "', 256)"
-
-    Set rs = Conn.Execute(sql)
-
-    If Not rs.EOF Then
-
-        If Nz(rs!ACESSO, 0) < 1 Then
-
-            MsgBox "Senha inválida!", vbExclamation
-
-        Else
-
-            LiberarModoAdmin
-
-        End If
-
-    End If
-
-    rs.Close
-    Set rs = Nothing
+    LiberarModoAdmin
 
     Exit Sub
 
 TrataErro:
 
-    If Not rs Is Nothing Then
-        If rs.State = adStateOpen Then rs.Close
-    End If
-
-    Set rs = Nothing
-
-    MsgBox "Erro: " & Err.Description, vbCritical
+    MsgBox "Erro: " & Err.Description, vbCritical, "SISTEMA"
 
 End Sub
 
-Public Sub ResetarSistema()
+Public Sub ReportarErro()
 
-    On Error Resume Next
-    
-    
-    'Fecha formulários abertos
-    Dim frm As Object
-    
-    For Each frm In VBA.UserForms
-        Unload frm
-    Next frm
-    
-    
-    'Limpa objetos globais se existirem
-    Set rs = Nothing
-    
-    
-    'Limpa erro atual
-    Err.Clear
-    
-    
-    'Volta tratamento normal
-    On Error GoTo 0
-    
-    
-    'Reabre tela principal
+    Dim sql As String
+
+    tela = UCase(Trim(tela))
+    etapa = UCase(Trim(etapa))
+    DescErro = Trim(DescErro)
+
+    sql = "INSERT INTO TAB_OCORRENCIAS " & _
+          "(OCORRENCIA, TELA, DESCRICAO, STATUS, IDUSUARIO, VERSAO_SISTEMA) " & _
+          "VALUES (" & _
+          SqlNumero(nErro) & ", " & _
+          SqlTexto(tela) & ", " & _
+          SqlTexto(DescErro) & ", " & _
+          "'PENDENTE', " & _
+          IDUsuarioLogado & ", " & _
+          SqlTexto(BuscarConfig("VERSAO_SISTEMA")) & ")"
+
+    Conn.Execute sql
+
+End Sub
+
+Public Sub ReiniciarSistema()
+
+    On Error GoTo TratarErro
+
+    Dim caminho As String
+
+    caminho = ThisWorkbook.FullName
+
+    Shell """" & Application.Path & "\EXCEL.EXE"" """ & caminho & """", vbNormalFocus
+
+    Application.Quit
+
+    Exit Sub
+
+TratarErro:
+
+    MsgBox "N�o foi poss�vel reiniciar o sistema." & vbCrLf & _
+           Err.Description, vbExclamation, "SISTEMA"
 
 End Sub
 

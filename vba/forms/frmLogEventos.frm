@@ -13,15 +13,22 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Carregando As Boolean
+Private carregando As Boolean
 
-Private Sub UserForm_Initialize()
+Private Sub AplicarPaleta()
 
-Carregando = True
+    AplicarTema Me
+    AplicarTemaLv lvLog
+    
+End Sub
+
+Private Sub UserForm_initialize()
+
+carregando = True
     With lvLog
     
     .View = lvwReport
-    .Gridlines = True
+    .Gridlines = False
     .AllowColumnReorder = True
     .FullRowSelect = True
     .HideSelection = False
@@ -36,6 +43,8 @@ Carregando = True
     
     End With
     
+    AplicarPaleta
+    
 CarregarFiltros
 
 cmbTipoEvento.AddItem "TODOS", 0
@@ -47,7 +56,7 @@ cmbDataFinal.ListIndex = 0
 cmbUsuario.ListIndex = 0
 cmbIdRel.ListIndex = 0
 
-Carregando = False
+carregando = False
 CarregarLog
     AtualizarTotal
 End Sub
@@ -60,19 +69,19 @@ Public Sub AtualizarTela()
 End Sub
 
 Private Sub cmbIdRel_Change()
-If Carregando Then Exit Sub
+If carregando Then Exit Sub
     AtualizarTela
 
 End Sub
 
 Private Sub cmbTipoEvento_Change()
-If Carregando Then Exit Sub
+If carregando Then Exit Sub
     AtualizarTela
 End Sub
 
 Private Sub cmbDataInicial_change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
 FormatarDatacmb cmbDataInicial
     ValidarPeriodo
     AtualizarTela
@@ -82,7 +91,7 @@ End Sub
 
 Private Sub cmbDataFinal_change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
 FormatarDatacmb cmbDataFinal
     ValidarPeriodo
     AtualizarTela
@@ -90,7 +99,7 @@ FormatarDatacmb cmbDataFinal
 End Sub
 
 Private Sub cmbUsuario_change()
-If Carregando Then Exit Sub
+If carregando Then Exit Sub
     AtualizarTela
 End Sub
 

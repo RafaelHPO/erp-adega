@@ -19,6 +19,12 @@ Public Origem As String
 Public IDOcorrencia As Long
 Public VersaoSistema
 
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+
+End Sub
+
 Private Sub btnCancelar_Click()
 
     Unload Me
@@ -172,6 +178,8 @@ Private Sub userform_activate()
     End If
         txtStatus.Enabled = False
         VersaoSistema = BuscarConfig("VERSAO_SISTEMA")
+
+    AplicarPaleta
 
 End Sub
 

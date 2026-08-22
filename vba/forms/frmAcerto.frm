@@ -13,7 +13,31 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Sub userform_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+
+    AplicarBotaoPrincipal btnSalvar
+    AplicarBotaoSecundario btnCancelar
+
+End Sub
+
+
+Private Sub UserForm_initialize()
+
+    CarregarProdutosCombo cmbProduto
+
+    cmbAcerto.List = Array( _
+        "ENTRADA", _
+        "SAIDA" _
+    )
+    
+    txtEAN5.SetFocus
+    AplicarPaleta
+    
+End Sub
+
+Private Sub txtean5_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
 
     If KeyCode = vbKeyEscape Then
         Unload Me
@@ -97,26 +121,23 @@ TratarErro:
 
 End Sub
 
-Private Sub UserForm_Initialize()
-
-    CarregarProdutosCombo cmbProduto
-
-    cmbAcerto.List = Array( _
-        "ENTRADA", _
-        "SAIDA" _
-    )
-
-End Sub
 
 Private Sub txtEAN5_AfterUpdate()
 
-    SelecionarProdutoPorEAN5 cmbProduto, txtEAN5.Value
+    SelecionarProdutoPorEAN cmbProduto, txtEAN5.Value
 
 cmbProduto.SetFocus
 
 End Sub
 
 Private Sub cmbProduto_afterupdate()
+
+    txtQuantidade.SetFocus
+
+End Sub
+
+
+Private Sub cmbProduto_change()
 
 On Error GoTo TratarErro
 
@@ -128,7 +149,7 @@ On Error GoTo TratarErro
 
     idproduto = CLng(cmbProduto.List(cmbProduto.ListIndex, 0))
 
-    sql = "SELECT ESTOQUEATUAL,TIPO " & _
+    sql = "SELECT ESTOQUEATUAL,TIPO, codigobarras " & _
           "FROM TAB_PRODUTOS " & _
           "WHERE IDPRODUTO = " & idproduto
 
@@ -156,13 +177,12 @@ On Error GoTo TratarErro
         End If
 
         txtAtual.Value = IIf(IsNull(rs!ESTOQUEATUAL), 0, rs!ESTOQUEATUAL)
-
+        txtEAN5.Value = Nz(rs!CodigoBarras)
+        
     End If
 
     rs.Close
     Set rs = Nothing
-    
-    txtQuantidade.SetFocus
     
     Exit Sub
 
@@ -179,42 +199,41 @@ TratarErro:
 
 End Sub
 
-Private Sub cmbAcerto_afterupdate()
+Private Sub CalcularPosterior()
 
     Dim posterior As Currency
-    
+
     If cmbAcerto.Value = "ENTRADA" Then
-    
-posterior = NzDbl(txtAtual.Value) + NzDbl(txtQuantidade.Value)
 
-Else
+        posterior = NzDbl(txtAtual.Value) + NzDbl(txtQuantidade.Value)
 
-posterior = NzDbl(txtAtual.Value) - NzDbl(txtQuantidade.Value)
+    ElseIf cmbAcerto.Value = "SAIDA" Then
 
-End If
+        posterior = NzDbl(txtAtual.Value) - NzDbl(txtQuantidade.Value)
+
+    Else
+
+        txtPosterior.Value = ""
+        Exit Sub
+
+    End If
 
     txtPosterior.Value = posterior
-    
- txtMotivo.SetFocus
 
 End Sub
 
-Private Sub txtquantidade_afterupdate()
+Private Sub cmbAcerto_AfterUpdate()
 
-    Dim posterior As Currency
-    
-    If cmbAcerto.Value = "ENTRADA" Then
-    
-posterior = NzDbl(txtAtual.Value) + NzDbl(txtQuantidade.Value)
+    CalcularPosterior
 
-Else
+    txtMotivo.SetFocus
 
-posterior = NzDbl(txtAtual.Value) - NzDbl(txtQuantidade.Value)
+End Sub
 
-End If
+Private Sub txtQuantidade_AfterUpdate()
 
-    txtPosterior.Value = posterior
-    
- txtMotivo.SetFocus
+    CalcularPosterior
+
+    cmbAcerto.SetFocus
 
 End Sub

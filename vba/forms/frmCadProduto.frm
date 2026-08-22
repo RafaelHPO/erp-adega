@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCadProduto 
    Caption         =   "CADASTRO DE PRODUTOS"
-   ClientHeight    =   8415.001
+   ClientHeight    =   6660
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   13755
+   ClientWidth     =   11460
    OleObjectBlob   =   "frmCadProduto.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -16,13 +16,16 @@ Attribute VB_Exposed = False
 Public OrigemXML As Boolean
 Public IdProdutoCriado As Long
 
-Private Sub txtPrecoVenda_Change()
+Private Sub AplicarPaleta()
 
-FormatarMoeda txtPrecoVenda
+    AplicarTema Me
+    AplicarBotaoPrincipal btnSalvar
+    AplicarBotaoPrincipal btnSalvarEdit
+    AplicarTemaLv lvsubgrupos
 
 End Sub
 
-Private Sub UserForm_Initialize()
+Private Sub UserForm_initialize()
 
     On Error GoTo TratarErro
 
@@ -61,6 +64,8 @@ btnEx.Visible = False
 txtMarkup.Locked = True
 txtSugerido.Locked = True
         
+        AplicarPaleta
+        
         Exit Sub
 
 TratarErro:
@@ -97,7 +102,7 @@ End If
 With lvsubgrupos
 
     .View = lvwReport
-    .Gridlines = True
+    .Gridlines = False
     .HideSelection = False
     .FullRowSelect = True
     
@@ -128,6 +133,12 @@ Private Sub txtCusto_Change()
 FormatarMoeda txtCusto
 
     CalcularPrecoSugerido
+
+End Sub
+
+Private Sub txtPrecoVenda_Change()
+
+FormatarMoeda txtPrecoVenda
 
 End Sub
 

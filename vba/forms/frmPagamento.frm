@@ -13,13 +13,65 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
 Private totalVenda As Currency
 Private ValorPago As Currency
 
 Option Explicit
 
 Public idvenda As Long
+
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarBotaoPrincipal btnPagar
+
+End Sub
+
+Private Sub userform_activate()
+
+    AtualizarFinanceiro
+
+End Sub
+
+Private Sub UserForm_initialize()
+
+On Error GoTo TratarErro
+
+    txtDinheiro.Visible = False
+    txtPix.Visible = False
+    txtCartao.Visible = False
+
+    txtDinheiro.Value = ""
+    txtPix.Value = ""
+    txtCartao.Value = ""
+    txtPendente.Value = ""
+
+    ckDinheiro.Value = False
+    ckPix.Value = False
+    ckCartao.Value = False
+    ckMulti.Value = False
+    
+    txtVr.Visible = False
+    txtVr.Value = ""
+    ckVR.Value = False
+    
+    AplicarPaleta
+    
+        Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "Pagamento - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+    
+End Sub
+
 
 Private Sub btnEstorno_Click()
 
@@ -54,48 +106,6 @@ FormatarMoeda txtVr
 
 End Sub
 
-Private Sub userform_activate()
-
-    AtualizarFinanceiro
-
-End Sub
-
-Private Sub UserForm_Initialize()
-
-On Error GoTo TratarErro
-
-    txtDinheiro.Visible = False
-    txtPix.Visible = False
-    txtCartao.Visible = False
-
-    txtDinheiro.Value = ""
-    txtPix.Value = ""
-    txtCartao.Value = ""
-    txtPendente.Value = ""
-
-    ckDinheiro.Value = False
-    ckPix.Value = False
-    ckCartao.Value = False
-    ckMulti.Value = False
-    
-    txtVr.Visible = False
-txtVr.Value = ""
-ckVR.Value = False
-    
-        Exit Sub
-
-TratarErro:
-
-    modSistema.tela = "Pagamento - initialize"
-    modSistema.DescErro = Err.Description
-    modSistema.nErro = Err.Number
-
-    Call modSistema.ReportarErro
-    
-    MsgBox "Erro: " & Err.Number & vbCrLf & _
-                        Err.Description, vbInformation, "SISTEMA"
-    
-End Sub
 Private Function GetPendenteVR() As Double
 
     GetPendenteVR = GetPendente() * IIf(ckVR.Value, 1.15, 1)

@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmCadUsuario 
    Caption         =   "CADASTRO DE USÚARIO"
-   ClientHeight    =   4830
+   ClientHeight    =   4095
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   8010
+   ClientWidth     =   6405
    OleObjectBlob   =   "frmCadUsuario.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -13,6 +13,23 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+
+Private Sub AplicarPaleta()
+    
+    AplicarTema Me
+    
+    AplicarBotaoPrincipal btnSalvar
+
+End Sub
+
+Private Sub UserForm_initialize()
+    
+    btnSalvarEdit.Visible = False
+    AplicarPaleta
+
+End Sub
+
 Private Sub userform_activate()
 
     On Error GoTo TratarErro
@@ -100,11 +117,6 @@ Private Sub btnCancelar_Click()
 
 End Sub
 
-Private Sub UserForm_Initialize()
-    
-    btnSalvarEdit.Visible = False
-
-End Sub
 Public Sub LimparCampos()
 
     txtNome.Value = ""

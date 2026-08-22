@@ -14,14 +14,23 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Sub UserForm_Initialize()
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarBotaoPrincipal btnNovoFornecedor
+    AplicarBotaoPrincipal btnExcluirFornecedor
+    AplicarTemaLv lvFornecedores
+    
+End Sub
+
+Private Sub UserForm_initialize()
 
 On Error GoTo TratarErro
 
     With lvFornecedores
         .View = lvwReport
         .FullRowSelect = True
-        .Gridlines = True
+        .Gridlines = False
         .HideSelection = False
         .ColumnHeaders.Clear
     End With
@@ -39,6 +48,8 @@ CarregarFornecedores
 
 cmbStatus.List = Array("TODOS", "ATIVO", "INATIVO")
 cmbStatus.ListIndex = 1
+
+AplicarPaleta
 
     Exit Sub
 

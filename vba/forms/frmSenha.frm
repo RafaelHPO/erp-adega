@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmSenha 
    Caption         =   "SENHA DO USUARIO"
-   ClientHeight    =   1710
+   ClientHeight    =   1800
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   4320
+   ClientWidth     =   4215
    OleObjectBlob   =   "frmSenha.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -15,9 +15,42 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Public SenhaValida As Boolean
 Public SenhaDigitada As String
+Public supervisor As Boolean
+Public admin As Boolean
+
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+
+End Sub
 
 Private Sub btnConfirmar_Click()
-
+    
+    If supervisor Then
+            If txtSenha.Value = SenhaSupervisor Then
+            SenhaValida = True
+            
+            Else
+                SenhaValida = False
+                MsgBox "Senha inválida", vbExclamation
+            End If
+            
+        Me.Hide
+      Exit Sub
+    End If
+        
+    If admin Then
+            If txtSenha.Value = SenhaManutencao Then
+            SenhaValida = True
+            
+            Else
+                SenhaValida = False
+                MsgBox "Senha inválida", vbExclamation
+            End If
+        Me.Hide
+      Exit Sub
+    End If
+        
     If ValidarSenha(txtSenha.Value) Then
         SenhaValida = True
     Else
@@ -29,3 +62,8 @@ Private Sub btnConfirmar_Click()
 
 End Sub
 
+Private Sub UserForm_initialize()
+
+    AplicarPaleta
+
+End Sub

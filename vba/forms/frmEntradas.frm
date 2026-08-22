@@ -14,6 +14,59 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Private Sub AplicarPaleta()
+
+    AplicarTema Me
+    AplicarBotaoPrincipal btnAbrirCompra
+    AplicarBotaoPrincipal btnCancelar
+    AplicarTemaLv lvCompras
+
+End Sub
+
+Private Sub UserForm_initialize()
+
+On Error GoTo TratarErro
+
+    With lvCompras
+
+        .View = lvwReport
+        .FullRowSelect = True
+        .Gridlines = False
+        .HideSelection = False
+
+        .ColumnHeaders.Clear
+
+        .ColumnHeaders.Add , , "ID", 60
+        .ColumnHeaders.Add , , "FORNECEDOR", 200
+        .ColumnHeaders.Add , , "NUMERO NF", 100
+        .ColumnHeaders.Add , , "DATA", 160
+        .ColumnHeaders.Add , , "VALOR TOTAL", 120
+        .ColumnHeaders.Add , , "STATUS", 100
+
+    End With
+
+    AplicarPaleta
+    
+    Exit Sub
+
+TratarErro:
+
+    modSistema.tela = "frmEntradas - initialize"
+    modSistema.DescErro = Err.Description
+    modSistema.nErro = Err.Number
+
+    Call modSistema.ReportarErro
+    
+    MsgBox "Erro: " & Err.Number & vbCrLf & _
+                        Err.Description, vbInformation, "SISTEMA"
+
+End Sub
+Private Sub userform_activate()
+
+    CarregarCompras
+
+End Sub
+
 Private Sub btnCancelar_Click()
 
 On Error GoTo TratarErro
@@ -241,7 +294,7 @@ On Error GoTo TratarErro
     rs.Close
     Set rs = Nothing
 
-    Exit Sub
+    Exit Function
 
 TratarErro:
 
@@ -281,49 +334,6 @@ Private Sub lvCompras_dblclick()
 
 End Sub
 
-Private Sub UserForm_Initialize()
-
-On Error GoTo TratarErro
-
-    With lvCompras
-
-        .View = lvwReport
-        .FullRowSelect = True
-        .Gridlines = True
-        .HideSelection = False
-
-        .ColumnHeaders.Clear
-
-        .ColumnHeaders.Add , , "ID", 60
-        .ColumnHeaders.Add , , "FORNECEDOR", 200
-        .ColumnHeaders.Add , , "NUMERO NF", 100
-        .ColumnHeaders.Add , , "DATA", 160
-        .ColumnHeaders.Add , , "VALOR TOTAL", 120
-        .ColumnHeaders.Add , , "STATUS", 100
-
-    End With
-
-    CarregarCompras
-
-    Exit Sub
-
-TratarErro:
-
-    modSistema.tela = "frmEntradas - initialize"
-    modSistema.DescErro = Err.Description
-    modSistema.nErro = Err.Number
-
-    Call modSistema.ReportarErro
-    
-    MsgBox "Erro: " & Err.Number & vbCrLf & _
-                        Err.Description, vbInformation, "SISTEMA"
-
-End Sub
-Private Sub userform_activate()
-
-    CarregarCompras
-
-End Sub
 
 Private Sub CarregarCompras()
 

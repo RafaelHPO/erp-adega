@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmMovimentoEstoque 
    Caption         =   "MOVIMENTO ESTOQUE"
-   ClientHeight    =   9420.001
+   ClientHeight    =   11925
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   19755
+   ClientWidth     =   20970
    OleObjectBlob   =   "frmMovimentoEstoque.frx":0000
    StartUpPosition =   1  'CenterOwner
 End
@@ -13,16 +13,23 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Carregando As Boolean
+Private carregando As Boolean
 
-Private Sub UserForm_Initialize()
+Private Sub AplicarPaleta()
 
-    Carregando = True
+    AplicarTema Me
+    AplicarTemaLv lvMovimento
+
+End Sub
+
+Private Sub UserForm_initialize()
+
+    carregando = True
 
     With lvMovimento
 
         .View = lvwReport
-        .Gridlines = True
+        .Gridlines = False
         .AllowColumnReorder = True
         .FullRowSelect = True
         .HideSelection = False
@@ -39,7 +46,8 @@ Private Sub UserForm_Initialize()
         .ColumnHeaders.Add , , "OBSERVAÇÃO", 200
 
     End With
-
+    
+AplicarPaleta
 
     CarregarFiltros
 CarregarProdutosCombo cmbProduto
@@ -51,7 +59,7 @@ cmbDataFinal.ListIndex = 0
 cmbUsuario.ListIndex = 0
 
 
-    Carregando = False
+    carregando = False
 
 cmbProduto.AddItem "TODOS", 0
 cmbProduto.ListIndex = 0
@@ -226,7 +234,7 @@ End Sub
 
 Private Sub cmbProduto_change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
 
     AtualizarTela
 
@@ -235,7 +243,7 @@ End Sub
 
 Private Sub cmbTipoMovimento_Change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
 
     AtualizarTela
 
@@ -243,7 +251,7 @@ End Sub
 
 Private Sub cmbDataInicial_change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
     FormatarData cmbDataInicial
     ValidarPeriodo
     AtualizarTela
@@ -253,7 +261,7 @@ End Sub
 
 Private Sub cmbDataFinal_change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
 FormatarData cmbDataFinal
     ValidarPeriodo
     AtualizarTela
@@ -263,7 +271,7 @@ End Sub
 
 Private Sub cmbUsuario_change()
 
-    If Carregando Then Exit Sub
+    If carregando Then Exit Sub
 
     AtualizarTela
 
